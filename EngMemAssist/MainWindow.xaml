@@ -1,12 +1,56 @@
-﻿<Window x:Class="EngMemAssist.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:EngMemAssist"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+<ui:FluentWindow x:Class="EngMemAssist.MainWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 xmlns:vm="clr-namespace:EngMemAssist.ViewModels"
+                 xmlns:views="clr-namespace:EngMemAssist.Views"
+                 Title="EngMemAssist"
+                 Width="1000"
+                 Height="600"
+                 MinWidth="720"
+                 MinHeight="480"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowBackdropType="Mica"
+                 WindowStartupLocation="CenterScreen">
 
+    <Window.Resources>
+        <!-- ViewModel -> View: страницы подбираются автоматически -->
+        <DataTemplate DataType="{x:Type vm:HomeViewModel}">
+            <views:HomeView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:WordsViewModel}">
+            <views:WordsView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:StatsViewModel}">
+            <views:StatsView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+            <views:SettingsView />
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar Grid.Row="0" Title="EngMemAssist" />
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Margin="12">
+                <ui:Button Margin="0,0,0,8" HorizontalAlignment="Stretch" Command="{Binding ShowHomeCommand}" Content="Главная" />
+                <ui:Button Margin="0,0,0,8" HorizontalAlignment="Stretch" Command="{Binding ShowWordsCommand}" Content="Список слов" />
+                <ui:Button Margin="0,0,0,8" HorizontalAlignment="Stretch" Command="{Binding ShowStatsCommand}" Content="Статистика" />
+                <ui:Button HorizontalAlignment="Stretch" Command="{Binding ShowSettingsCommand}" Content="Настройки" />
+            </StackPanel>
+
+            <ContentControl Grid.Column="1" Margin="16" Content="{Binding Navigation.Current}" />
+        </Grid>
     </Grid>
-</Window>
+</ui:FluentWindow>

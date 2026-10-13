@@ -1,3 +1,6 @@
 <Solution>
+  <Project Path="EngMemAssist.Core/EngMemAssist.Core.csproj" />
+  <Project Path="EngMemAssist.Data/EngMemAssist.Data.csproj" />
+  <Project Path="EngMemAssist.Nlp/EngMemAssist.Nlp.csproj" />
   <Project Path="EngMemAssist/EngMemAssist.csproj" />
 </Solution>

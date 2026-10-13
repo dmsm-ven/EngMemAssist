@@ -1,0 +1,16 @@
+<Project>
+  <!-- Central Package Management: версии пакетов задаются только здесь. -->
+  <!-- ВАЖНО: версии выставлены по памяти, NuGet из среды генерации был недоступен.
+       Если restore ругается на версию, поправьте её здесь (одно место на всё решение). -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
+    <PackageVersion Include="WPF-UI" Version="4.0.3" />
+    <PackageVersion Include="Dapper" Version="2.1.66" />
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.0" />
+    <PackageVersion Include="dbup-sqlite" Version="6.0.4" />
+  </ItemGroup>
+</Project>
