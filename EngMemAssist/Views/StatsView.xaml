@@ -51,9 +51,10 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <TextBlock Margin="0,0,0,8" FontSize="16" FontWeight="SemiBold" Text="Последние тесты" />
+                <TextBlock Margin="0,0,0,8" FontSize="16" FontWeight="SemiBold" Text="Последние тесты (нажмите, чтобы открыть результаты)" TextWrapping="Wrap" />
                 <DataGrid Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
-                          CanUserAddRows="False" ItemsSource="{Binding Sessions}">
+                          CanUserAddRows="False" SelectionMode="Single" ItemsSource="{Binding Sessions}"
+                          SelectedItem="{Binding SelectedSession}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Width="*" Header="Дата" Binding="{Binding StartedAtLocal}" />
                         <DataGridTextColumn Width="Auto" Header="Результат" Binding="{Binding ScoreText}" />

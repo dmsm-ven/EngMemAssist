@@ -4,6 +4,7 @@
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
 
     <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <!-- Неверные ответы подсвечиваются в каждой колонке (без переопределения стиля строки WPF-UI). -->
         <Style x:Key="ResultTextStyle" TargetType="TextBlock">
             <Setter Property="VerticalAlignment" Value="Center" />
@@ -22,7 +23,11 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Margin="0,0,0,16" FontSize="24" FontWeight="SemiBold" Text="{Binding SummaryText}" />
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock FontSize="24" FontWeight="SemiBold" Text="{Binding SummaryText}" />
+            <TextBlock Margin="0,4,0,0" Opacity="0.7" Text="{Binding Subtitle}"
+                       Visibility="{Binding IsHistory, Converter={StaticResource BoolToVis}}" />
+        </StackPanel>
 
         <DataGrid Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
                   GridLinesVisibility="Horizontal" CanUserAddRows="False" ItemsSource="{Binding Result.Rows}">
@@ -38,7 +43,9 @@
 
         <StackPanel Grid.Row="2" Margin="0,16,0,0" Orientation="Horizontal">
             <ui:Button Margin="0,0,8,0" Padding="24,10" Appearance="Primary" Command="{Binding AgainCommand}" Content="Ещё раз" />
-            <ui:Button Padding="16,10" Command="{Binding HomeCommand}" Content="На главную" />
+            <ui:Button Margin="0,0,8,0" Padding="16,10" Command="{Binding HomeCommand}" Content="На главную" />
+            <ui:Button Padding="16,10" Command="{Binding BackToStatsCommand}" Content="К статистике"
+                       Visibility="{Binding IsHistory, Converter={StaticResource BoolToVis}}" />
         </StackPanel>
     </Grid>
 </UserControl>

@@ -34,6 +34,13 @@ public sealed partial class WordsViewModel : PageViewModelBase
     public override async Task OnNavigatedToAsync()
     {
         _all = await _words.GetActiveAsync();
+
+        var counts = await _sentences.CountByWordAsync();
+        foreach (var word in _all)
+        {
+            word.SentenceCount = counts.GetValueOrDefault(word.Id);
+        }
+
         ApplyFilter();
     }
 

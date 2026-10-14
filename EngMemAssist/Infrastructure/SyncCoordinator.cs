@@ -157,6 +157,11 @@ public sealed partial class SyncCoordinator : ObservableObject
             parts.Add($"не удалось загрузить предложения для {result.FailedWords} сл.");
         }
 
+        if (result.WordsWithoutSentences > 0)
+        {
+            parts.Add($"без предложений: {result.WordsWithoutSentences} сл. (в квизе не участвуют)");
+        }
+
         var text = string.Join(", ", parts) + ".";
 
         if (_lemmatizerDiagnostics.DegradedReason is { } reason)

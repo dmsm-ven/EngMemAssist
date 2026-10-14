@@ -80,6 +80,7 @@ public partial class App : Application
         services.AddNlp();
         services.AddIntegrations();
 
+        services.AddSingleton<ISyncLog, FileSyncLog>();
         services.AddSingleton<IWordSyncService, WordSyncService>();
         services.AddSingleton<IQuizService, QuizService>();
 

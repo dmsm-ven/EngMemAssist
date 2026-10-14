@@ -7,9 +7,17 @@ namespace EngMemAssist.Core.Services;
 
 public sealed class WordSyncService : IWordSyncService
 {
+    /// <summary>Предложения короче считаются слишком бедными по контексту и берутся только за неимением других.</summary>
     private const int MinWordsInSentence = 4;
-    private const int MaxWordsInSentence = 30;
-    private const int MaxCandidatesPerWord = 60;
+
+    /// <summary>Хорошее предложение: 8 слов и больше. Берутся в первую очередь.</summary>
+    private const int PreferredMinWords = 8;
+
+    private const int MaxWordsInSentence = 40;
+    private const int MaxCandidatesPerWord = 80;
+
+    /// <summary>Слово, у которого предложений меньше нужного, запрашивается повторно не чаще раза в сутки.</summary>
+    private static readonly TimeSpan RetryInterval = TimeSpan.FromDays(1);
 
     private readonly IWordSource _source;
     private readonly ILemmatizer _lemmatizer;
@@ -17,6 +25,7 @@ public sealed class WordSyncService : IWordSyncService
     private readonly ISentenceRepository _sentences;
     private readonly ISentenceProvider _provider;
     private readonly ISettingsService _settings;
+    private readonly ISyncLog _log;
 
     public WordSyncService(
         IWordSource source,
@@ -24,7 +33,8 @@ public sealed class WordSyncService : IWordSyncService
         IWordRepository words,
         ISentenceRepository sentences,
         ISentenceProvider provider,
-        ISettingsService settings)
+        ISettingsService settings,
+        ISyncLog log)
     {
         _source = source;
         _lemmatizer = lemmatizer;
@@ -32,6 +42,7 @@ public sealed class WordSyncService : IWordSyncService
         _sentences = sentences;
         _provider = provider;
         _settings = settings;
+        _log = log;
     }
 
     public async Task<SyncResult> SyncAsync(IProgress<string>? progress = null, CancellationToken cancellationToken = default)
@@ -45,7 +56,13 @@ public sealed class WordSyncService : IWordSyncService
         var existing = await _words.GetAllAsync();
         var diff = await ApplyDiffAsync(parsed, existing);
 
-        var toFetch = diff.Active.Where(w => w.SentencesFetchedAt is null).ToList();
+        var wanted = Math.Max(1, _settings.Current.SentencesPerWord);
+        var counts = new Dictionary<long, int>(await _sentences.CountByWordAsync());
+        var now = DateTime.UtcNow;
+
+        var toFetch = diff.Active.Where(w => NeedsSentences(w, counts, wanted, now)).ToList();
+        _log.Write($"Синхронизация: слов в таблице {parsed.Count}, активных {diff.Active.Count}, нужны предложения для {toFetch.Count}.");
+
         var sentencesAdded = 0;
         var failed = 0;
         var rateLimited = false;
@@ -60,25 +77,32 @@ public sealed class WordSyncService : IWordSyncService
 
             try
             {
-                var found = await FetchSentencesAsync(word, cancellationToken);
+                var found = await FetchSentencesAsync(word, wanted, cancellationToken);
                 await _sentences.AddRangeAsync(found);
 
                 word.SentencesFetchedAt = DateTime.UtcNow;
                 await _words.UpdateAsync(word);
+
                 sentencesAdded += found.Count;
+                counts[word.Id] = counts.GetValueOrDefault(word.Id) + found.Count;
             }
             catch (TooManyRequestsException ex)
             {
                 rateLimited = true;
                 rateLimitMessage = ex.Message;
+                _log.Write($"{word.English}: превышен лимит запросов — {ex.Message}. Загрузка остановлена, остальные слова будут обработаны при следующей синхронизации.");
                 break;
             }
-            catch (SentenceProviderException)
+            catch (SentenceProviderException ex)
             {
                 // Слово останется без отметки и будет запрошено заново при следующей синхронизации.
                 failed++;
+                _log.Write($"{word.English}: ошибка источника — {ex.Message}");
             }
         }
+
+        var withoutSentences = diff.Active.Count(w => counts.GetValueOrDefault(w.Id) == 0);
+        _log.Write($"Готово: предложений добавлено {sentencesAdded}, ошибок {failed}, слов без предложений {withoutSentences}.");
 
         return new SyncResult(
             diff.Added,
@@ -88,7 +112,18 @@ public sealed class WordSyncService : IWordSyncService
             failed,
             diff.Active.Count,
             rateLimited,
-            rateLimitMessage);
+            rateLimitMessage,
+            withoutSentences);
+    }
+
+    private static bool NeedsSentences(Word word, Dictionary<long, int> counts, int wanted, DateTime now)
+    {
+        if (word.SentencesFetchedAt is not { } fetchedAt)
+        {
+            return true;
+        }
+
+        return counts.GetValueOrDefault(word.Id) < wanted && now - fetchedAt > RetryInterval;
     }
 
     private sealed record ParsedWord(string English, string Translation, string Lemma);
@@ -190,38 +225,33 @@ public sealed class WordSyncService : IWordSyncService
         return new DiffResult(added, updated, removed, active);
     }
 
-    private async Task<List<Sentence>> FetchSentencesAsync(Word word, CancellationToken cancellationToken)
+    private async Task<List<Sentence>> FetchSentencesAsync(Word word, int wanted, CancellationToken cancellationToken)
     {
-        var wanted = Math.Max(1, _settings.Current.SentencesPerWord);
+        var query = new SentenceQuery(word.English, word.Lemma);
+        var batch = await _provider.FindAsync(query, MaxCandidatesPerWord, cancellationToken);
 
-        var queries = new List<string> { word.English };
-        var lemmaQuery = word.Lemma;
-        if (!lemmaQuery.Contains(' ') && !string.Equals(lemmaQuery, word.English, StringComparison.OrdinalIgnoreCase))
-        {
-            queries.Add(lemmaQuery);
-        }
-
-        var candidates = new List<SentenceCandidate>();
         var seenTexts = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var query in queries)
-        {
-            var batch = await _provider.FindAsync(query, MaxCandidatesPerWord, cancellationToken);
-            foreach (var candidate in batch)
-            {
-                if (seenTexts.Add(candidate.Text.Trim()))
-                {
-                    candidates.Add(candidate);
-                }
-            }
-        }
+        var candidates = batch.Where(c => seenTexts.Add(c.Text.Trim())).ToList();
 
-        return await Task.Run(() => PickMatching(word, candidates, wanted), cancellationToken);
+        var pick = await Task.Run(() => PickMatching(word, candidates, wanted), cancellationToken);
+
+        _log.Write(
+            $"{word.English} (лемма «{word.Lemma}»): кандидатов {candidates.Count}, " +
+            $"содержат слово {pick.Matched}, длинных (от {PreferredMinWords} слов) {pick.Long}, сохранено {pick.Picked.Count}");
+
+        return pick.Picked;
     }
 
-    private List<Sentence> PickMatching(Word word, List<SentenceCandidate> candidates, int wanted)
+    private sealed record PickResult(List<Sentence> Picked, int Matched, int Long);
+
+    /// <summary>
+    /// Из кандидатов оставляет те, где найдено слово (в любой форме), и выбирает нужное число:
+    /// сначала длинные (больше контекста), затем средние, затем короткие.
+    /// </summary>
+    private PickResult PickMatching(Word word, List<SentenceCandidate> candidates, int wanted)
     {
         var pattern = WordPattern.Create(_lemmatizer, word.English);
-        var matches = new List<Sentence>();
+        var matches = new List<(Sentence Sentence, int Words)>();
 
         foreach (var candidate in candidates.Take(MaxCandidatesPerWord * 2))
         {
@@ -237,7 +267,7 @@ public sealed class WordSyncService : IWordSyncService
                 continue;
             }
 
-            matches.Add(new Sentence
+            matches.Add((new Sentence
             {
                 WordId = word.Id,
                 Text = text,
@@ -245,10 +275,18 @@ public sealed class WordSyncService : IWordSyncService
                 Source = candidate.Source,
                 MatchStart = start,
                 MatchLength = length,
-            });
+            }, tokens.Count));
         }
 
-        return matches.OrderBy(_ => Random.Shared.Next()).Take(wanted).ToList();
+        var picked = matches
+            .GroupBy(m => m.Words >= PreferredMinWords ? 0 : m.Words >= 6 ? 1 : 2)
+            .OrderBy(g => g.Key)
+            .SelectMany(g => g.OrderBy(_ => Random.Shared.Next()))
+            .Take(wanted)
+            .Select(m => m.Sentence)
+            .ToList();
+
+        return new PickResult(picked, matches.Count, matches.Count(m => m.Words >= PreferredMinWords));
     }
 
     private static string CollapseSpaces(string? value) =>

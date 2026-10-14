@@ -26,6 +26,9 @@ public sealed class Word
     /// <summary>Когда успешно запрашивали предложения. Null — предложения ещё не загружены (или была ошибка).</summary>
     public DateTime? SentencesFetchedAt { get; set; }
 
+    /// <summary>Сколько проверочных предложений загружено (не хранится в Words, заполняется при показе списка).</summary>
+    public int SentenceCount { get; set; }
+
     /// <summary>Отдельные значения перевода (любое из них считается верным).</summary>
     public IReadOnlyList<string> GetTranslations() =>
         Translation.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);

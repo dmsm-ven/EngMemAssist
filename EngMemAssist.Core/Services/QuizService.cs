@@ -82,6 +82,7 @@ public sealed class QuizService : IQuizService
                 SentenceId = question.SentenceId,
                 ChosenTranslation = choice ?? "",
                 CorrectTranslation = question.AllTranslations,
+                CorrectOption = question.CorrectOption,
                 IsCorrect = isCorrect,
                 AnsweredAt = finishedAt,
             });

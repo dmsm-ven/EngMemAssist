@@ -35,6 +35,20 @@ public sealed class SentenceRepository : ISentenceRepository
         await transaction.CommitAsync();
     }
 
+    public async Task<IReadOnlyDictionary<long, int>> CountByWordAsync()
+    {
+        await using var connection = _factory.Create();
+        var rows = await connection.QueryAsync<CountRow>(
+            "SELECT WordId, COUNT(*) AS Total FROM Sentences WHERE MatchStart >= 0 GROUP BY WordId");
+        return rows.ToDictionary(r => r.WordId, r => r.Total);
+    }
+
+    private sealed class CountRow
+    {
+        public long WordId { get; set; }
+        public int Total { get; set; }
+    }
+
     public async Task<IReadOnlyList<Sentence>> GetByWordIdsAsync(IReadOnlyCollection<long> wordIds)
     {
         if (wordIds.Count == 0)

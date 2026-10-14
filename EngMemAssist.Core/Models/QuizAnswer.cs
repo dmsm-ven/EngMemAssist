@@ -8,6 +8,9 @@ public sealed class QuizAnswer
     public long? SentenceId { get; set; }
     public string ChosenTranslation { get; set; } = "";
     public string CorrectTranslation { get; set; } = "";
+
+    /// <summary>Верный вариант, который был показан среди вариантов (у старых записей null).</summary>
+    public string? CorrectOption { get; set; }
     public bool IsCorrect { get; set; }
     public DateTime AnsweredAt { get; set; }
 }

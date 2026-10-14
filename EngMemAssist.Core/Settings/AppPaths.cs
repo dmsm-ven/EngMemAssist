@@ -15,6 +15,9 @@ public static class AppPaths
     /// <summary>Папка, где Google.Apis хранит OAuth-токены.</summary>
     public static string GoogleTokenDirectory => Path.Combine(Root, "google-token");
 
+    /// <summary>Журнал синхронизации (по каждому слову: сколько предложений нашлось).</summary>
+    public static string SyncLogFile => Path.Combine(Root, "sync.log");
+
     /// <summary>Папка с языковыми моделями Catalyst.</summary>
     public static string NlpModelsDirectory => Path.Combine(Root, "catalyst-models");
 

@@ -8,7 +8,8 @@ public sealed record SyncResult(
     int FailedWords,
     int TotalActive,
     bool RateLimited,
-    string? RateLimitMessage);
+    string? RateLimitMessage,
+    int WordsWithoutSentences);
 
 public interface IWordSyncService
 {

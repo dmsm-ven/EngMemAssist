@@ -35,8 +35,8 @@ public sealed class QuizRepository : IQuizRepository
 
         await connection.ExecuteAsync(
             """
-            INSERT INTO QuizAnswers (SessionId, WordId, SentenceId, ChosenTranslation, CorrectTranslation, IsCorrect, AnsweredAt)
-            VALUES (@SessionId, @WordId, @SentenceId, @ChosenTranslation, @CorrectTranslation, @IsCorrect, @AnsweredAt)
+            INSERT INTO QuizAnswers (SessionId, WordId, SentenceId, ChosenTranslation, CorrectTranslation, CorrectOption, IsCorrect, AnsweredAt)
+            VALUES (@SessionId, @WordId, @SentenceId, @ChosenTranslation, @CorrectTranslation, @CorrectOption, @IsCorrect, @AnsweredAt)
             """,
             answers,
             transaction);
@@ -93,6 +93,45 @@ public sealed class QuizRepository : IQuizRepository
             """,
             new { take });
         return rows.AsList();
+    }
+
+    public async Task<QuizResult> GetSessionResultAsync(long sessionId)
+    {
+        await using var connection = _factory.Create();
+        var rows = await connection.QueryAsync<AnswerRow>(
+            """
+            SELECT w.English                                          AS English,
+                   a.ChosenTranslation                                AS Chosen,
+                   COALESCE(a.CorrectOption, a.CorrectTranslation)    AS CorrectOption,
+                   a.CorrectTranslation                               AS AllTranslations,
+                   a.IsCorrect                                        AS IsCorrect
+            FROM QuizAnswers a
+            JOIN Words w ON w.Id = a.WordId
+            WHERE a.SessionId = @sessionId
+            ORDER BY a.Id
+            """,
+            new { sessionId });
+
+        var result = rows
+            .Select((r, i) => new QuizResultRow(
+                i + 1,
+                r.English,
+                string.IsNullOrEmpty(r.Chosen) ? "—" : r.Chosen,
+                r.CorrectOption,
+                r.AllTranslations,
+                r.IsCorrect))
+            .ToList();
+
+        return new QuizResult(result);
+    }
+
+    private sealed class AnswerRow
+    {
+        public string English { get; set; } = "";
+        public string Chosen { get; set; } = "";
+        public string CorrectOption { get; set; } = "";
+        public string AllTranslations { get; set; } = "";
+        public bool IsCorrect { get; set; }
     }
 
     public async Task<IReadOnlyList<WordDifficulty>> GetHardestWordsAsync(int take)

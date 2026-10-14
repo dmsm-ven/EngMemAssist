@@ -1,47 +1,71 @@
 using System.Net;
-using System.Net.Http.Json;
 using System.Text.Json;
 using EngMemAssist.Core.Abstractions;
 using EngMemAssist.Core.Exceptions;
 
 namespace EngMemAssist.Integrations;
 
-/// <summary>Реальные предложения с переводами из корпуса Tatoeba (бесплатно, без ключа).</summary>
+/// <summary>
+/// Реальные предложения с русскими переводами из корпуса Tatoeba (бесплатно, без ключа).
+/// Tatoeba сам учитывает формы слова (по stirs найдёт stir, stirred, stirring), но корпус состоит
+/// в основном из коротких фраз, поэтому запрашиваются сначала самые длинные предложения, затем случайная выборка.
+/// </summary>
 public sealed class TatoebaSentenceProvider : ISentenceProvider
 {
     private const string BaseUrl = "https://tatoeba.org/en/api_v0/search";
-    private const int MaxPages = 2;
 
-    private readonly HttpClient _http;
+    // Страница даёт 10 предложений. Первый порядок — по числу слов, от длинных к коротким.
+    private static readonly string[] Orders = ["sort=words&sort_reverse=yes", "sort=random"];
 
-    public TatoebaSentenceProvider(HttpClient http)
+    private readonly ThrottledHttpClient _http;
+
+    public TatoebaSentenceProvider(ThrottledHttpClient http)
     {
         _http = http;
     }
 
     public async Task<IReadOnlyList<SentenceCandidate>> FindAsync(
-        string query, int maxResults, CancellationToken cancellationToken = default)
+        SentenceQuery query, int maxResults, CancellationToken cancellationToken = default)
     {
-        var result = new List<SentenceCandidate>();
+        var result = await SearchAsync(query.Word, cancellationToken);
 
-        for (var page = 1; page <= MaxPages && result.Count < maxResults; page++)
+        if (result.Count == 0 && !string.Equals(query.Lemma, query.Word, StringComparison.OrdinalIgnoreCase))
         {
-            var batch = await FetchPageAsync(query, page, cancellationToken);
-            if (batch.Count == 0)
+            result = await SearchAsync(query.Lemma, cancellationToken);
+        }
+
+        return result.Take(maxResults).ToList();
+    }
+
+    private async Task<List<SentenceCandidate>> SearchAsync(string text, CancellationToken cancellationToken)
+    {
+        var list = new List<SentenceCandidate>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var order in Orders)
+        {
+            foreach (var candidate in await FetchPageAsync(text, order, cancellationToken))
+            {
+                if (seen.Add(candidate.Text))
+                {
+                    list.Add(candidate);
+                }
+            }
+
+            // Если по слову ничего нет, вторую выборку не запрашиваем.
+            if (list.Count == 0)
             {
                 break;
             }
-
-            result.AddRange(batch);
         }
 
-        return result;
+        return list;
     }
 
-    private async Task<List<SentenceCandidate>> FetchPageAsync(string query, int page, CancellationToken cancellationToken)
+    private async Task<List<SentenceCandidate>> FetchPageAsync(string text, string order, CancellationToken cancellationToken)
     {
-        var url = $"{BaseUrl}?from=eng&to=rus&query={Uri.EscapeDataString(query)}" +
-                  $"&trans_filter=limit&orphans=no&unapproved=no&sort=random&page={page}";
+        var url = $"{BaseUrl}?from=eng&to=rus&query={Uri.EscapeDataString(text)}" +
+                  $"&trans_filter=limit&orphans=no&unapproved=no&{order}&page=1";
 
         try
         {
