@@ -12,7 +12,7 @@
     <PackageVersion Include="Dapper" Version="2.1.66" />
     <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.0" />
     <PackageVersion Include="dbup-sqlite" Version="6.0.4" />
-    <PackageVersion Include="Catalyst" Version="1.0.54" />
+    <PackageVersion Include="Catalyst" Version="1.0.30950" />
     <PackageVersion Include="Catalyst.Models.English" Version="1.0.30952" />
     <PackageVersion Include="Google.Apis.Sheets.v4" Version="1.68.0" />
   </ItemGroup>
