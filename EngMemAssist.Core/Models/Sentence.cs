@@ -10,4 +10,12 @@ public sealed class Sentence
 
     /// <summary>Откуда взято предложение, например "tatoeba".</summary>
     public string Source { get; set; } = "";
+
+    /// <summary>Позиция слова в тексте (для выделения в квизе). -1 — не найдено.</summary>
+    public int MatchStart { get; set; } = -1;
+
+    public int MatchLength { get; set; }
+
+    public bool HasValidMatch =>
+        MatchStart >= 0 && MatchLength > 0 && MatchStart + MatchLength <= Text.Length;
 }

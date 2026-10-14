@@ -1,3 +1,4 @@
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using EngMemAssist.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,8 +18,27 @@ public sealed partial class NavigationService : ObservableObject, INavigationSer
         _serviceProvider = serviceProvider;
     }
 
-    public void NavigateTo<TViewModel>() where TViewModel : PageViewModelBase
+    public void NavigateTo<TViewModel>(Action<TViewModel>? configure = null) where TViewModel : PageViewModelBase
     {
-        Current = _serviceProvider.GetRequiredService<TViewModel>();
+        Current?.OnNavigatedFrom();
+
+        var viewModel = _serviceProvider.GetRequiredService<TViewModel>();
+        configure?.Invoke(viewModel);
+        Current = viewModel;
+
+        _ = RunNavigatedAsync(viewModel);
+    }
+
+    private static async Task RunNavigatedAsync(PageViewModelBase viewModel)
+    {
+        try
+        {
+            await viewModel.OnNavigatedToAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Ошибка при открытии страницы «{viewModel.Title}»:\n{ex.Message}", "EngMemAssist",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 }

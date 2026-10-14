@@ -1,5 +1,29 @@
 <UserControl x:Class="EngMemAssist.Views.SettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <TextBlock FontSize="24" Text="{Binding Title}" />
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+
+    <StackPanel MaxWidth="680" HorizontalAlignment="Left">
+        <TextBlock Margin="0,0,0,16" FontSize="24" FontWeight="SemiBold" Text="Настройки" />
+
+        <TextBlock Margin="0,0,0,4" Text="Google Spreadsheet" />
+        <TextBox Margin="0,0,0,8" IsReadOnly="True" Text="{Binding SpreadsheetUrl, Mode=OneWay}" />
+        <StackPanel Margin="0,0,0,24" Orientation="Horizontal">
+            <ui:Button Margin="0,0,8,0" Command="{Binding ChangeSpreadsheetCommand}" Content="Сменить таблицу" />
+            <ui:Button Command="{Binding SignOutGoogleCommand}" Content="Выйти из аккаунта Google" />
+        </StackPanel>
+
+        <TextBlock Margin="0,0,0,4" Text="Вопросов в одном квизе" />
+        <ComboBox Width="120" Margin="0,0,0,24" HorizontalAlignment="Left"
+                  ItemsSource="{Binding QuestionCountOptions}" SelectedItem="{Binding QuestionCount}" />
+
+        <TextBlock Margin="0,0,0,4" Text="Тема" />
+        <ComboBox Width="120" Margin="0,0,0,24" HorizontalAlignment="Left"
+                  ItemsSource="{Binding ThemeOptions}" SelectedItem="{Binding Theme}" />
+
+        <TextBlock Margin="0,0,0,4" Text="Файлы приложения" />
+        <TextBlock Margin="0,0,0,8" Opacity="0.7" TextWrapping="Wrap"
+                   Text="{Binding ClientSecretPath, StringFormat=OAuth-ключ Google (client_secret.json): {0}}" />
+        <ui:Button Command="{Binding OpenDataFolderCommand}" Content="Открыть папку" />
+    </StackPanel>
 </UserControl>

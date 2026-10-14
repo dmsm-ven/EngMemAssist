@@ -5,6 +5,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Catalyst" />
+    <PackageReference Include="Catalyst.Models.English" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
   </ItemGroup>
 

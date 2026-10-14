@@ -6,5 +6,6 @@ public interface INavigationService
 {
     PageViewModelBase? Current { get; }
 
-    void NavigateTo<TViewModel>() where TViewModel : PageViewModelBase;
+    /// <summary>Открывает страницу. configure позволяет передать данные во ViewModel до показа.</summary>
+    void NavigateTo<TViewModel>(Action<TViewModel>? configure = null) where TViewModel : PageViewModelBase;
 }

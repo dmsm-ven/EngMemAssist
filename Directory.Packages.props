@@ -1,7 +1,7 @@
 <Project>
   <!-- Central Package Management: версии пакетов задаются только здесь. -->
-  <!-- ВАЖНО: версии выставлены по памяти, NuGet из среды генерации был недоступен.
-       Если restore ругается на версию, поправьте её здесь (одно место на всё решение). -->
+  <!-- ВАЖНО: версии Catalyst и Google.Apis выставлены по памяти (NuGet из среды генерации недоступен).
+       NuGet берёт ближайшую доступную версию не ниже указанной; если restore всё же ругается — поправьте здесь. -->
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
@@ -12,5 +12,8 @@
     <PackageVersion Include="Dapper" Version="2.1.66" />
     <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.0" />
     <PackageVersion Include="dbup-sqlite" Version="6.0.4" />
+    <PackageVersion Include="Catalyst" Version="1.0.54" />
+    <PackageVersion Include="Catalyst.Models.English" Version="1.0.30952" />
+    <PackageVersion Include="Google.Apis.Sheets.v4" Version="1.68.0" />
   </ItemGroup>
 </Project>

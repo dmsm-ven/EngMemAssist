@@ -23,6 +23,9 @@ public sealed class Word
     public int WrongCount { get; set; }
     public DateTime? LastAskedAt { get; set; }
 
+    /// <summary>Когда успешно запрашивали предложения. Null — предложения ещё не загружены (или была ошибка).</summary>
+    public DateTime? SentencesFetchedAt { get; set; }
+
     /// <summary>Отдельные значения перевода (любое из них считается верным).</summary>
     public IReadOnlyList<string> GetTranslations() =>
         Translation.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);

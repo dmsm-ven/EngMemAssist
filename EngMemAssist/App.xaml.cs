@@ -1,9 +1,13 @@
 using System.Windows;
+using EngMemAssist.Core.Services;
 using EngMemAssist.Core.Settings;
 using EngMemAssist.Data;
+using EngMemAssist.Infrastructure;
+using EngMemAssist.Integrations;
 using EngMemAssist.Navigation;
 using EngMemAssist.Nlp;
 using EngMemAssist.ViewModels;
+using EngMemAssist.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -29,6 +33,8 @@ public partial class App : Application
 
             _host.Services.GetRequiredService<IDatabaseMigrator>().Migrate();
 
+            ThemeHelper.Apply(_host.Services.GetRequiredService<ISettingsService>().Current.Theme);
+
             var mainWindow = _host.Services.GetRequiredService<MainWindow>();
             MainWindow = mainWindow;
             mainWindow.Show();
@@ -40,6 +46,18 @@ public partial class App : Application
             MessageBox.Show($"Не удалось запустить приложение:\n{ex.Message}", "EngMemAssist",
                 MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown(1);
+            return;
+        }
+
+        // Синхронизация со стартовой таблицей: если таблица не подключена, сначала откроется окно подключения.
+        try
+        {
+            await _host.Services.GetRequiredService<SyncCoordinator>().RunStartupAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Ошибка при запуске синхронизации:\n{ex.Message}", "EngMemAssist",
+                MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -60,15 +78,26 @@ public partial class App : Application
 
         services.AddData(AppPaths.DatabaseFile);
         services.AddNlp();
+        services.AddIntegrations();
+
+        services.AddSingleton<IWordSyncService, WordSyncService>();
+        services.AddSingleton<IQuizService, QuizService>();
 
         services.AddSingleton<INavigationService, NavigationService>();
+        services.AddSingleton<IDialogService, DialogService>();
+        services.AddSingleton<SyncCoordinator>();
 
         services.AddSingleton<MainWindow>();
         services.AddSingleton<MainViewModel>();
 
         services.AddTransient<HomeViewModel>();
+        services.AddTransient<QuizViewModel>();
+        services.AddTransient<ResultsViewModel>();
         services.AddTransient<WordsViewModel>();
         services.AddTransient<StatsViewModel>();
         services.AddTransient<SettingsViewModel>();
+
+        services.AddTransient<ConnectSpreadsheetViewModel>();
+        services.AddTransient<ConnectSpreadsheetWindow>();
     }
 }

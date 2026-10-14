@@ -6,9 +6,9 @@
                  xmlns:views="clr-namespace:EngMemAssist.Views"
                  Title="EngMemAssist"
                  Width="1000"
-                 Height="600"
-                 MinWidth="720"
-                 MinHeight="480"
+                 Height="640"
+                 MinWidth="800"
+                 MinHeight="520"
                  ExtendsContentIntoTitleBar="True"
                  WindowBackdropType="Mica"
                  WindowStartupLocation="CenterScreen">
@@ -17,6 +17,12 @@
         <!-- ViewModel -> View: страницы подбираются автоматически -->
         <DataTemplate DataType="{x:Type vm:HomeViewModel}">
             <views:HomeView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:QuizViewModel}">
+            <views:QuizView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ResultsViewModel}">
+            <views:ResultsView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:WordsViewModel}">
             <views:WordsView />

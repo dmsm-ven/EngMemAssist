@@ -1,0 +1,51 @@
+<ui:FluentWindow x:Class="EngMemAssist.Views.ConnectSpreadsheetWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 Title="Подключение таблицы"
+                 Width="620"
+                 Height="460"
+                 ExtendsContentIntoTitleBar="True"
+                 ResizeMode="CanMinimize"
+                 WindowBackdropType="Mica"
+                 WindowStartupLocation="CenterOwner">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar Grid.Row="0" Title="Подключение таблицы" ShowMaximize="False" ShowMinimize="False" />
+
+        <StackPanel Grid.Row="1" Margin="24,8,24,24">
+            <TextBlock Margin="0,0,0,8" FontSize="20" FontWeight="SemiBold" Text="Источник слов" />
+            <TextBlock Margin="0,0,0,12" Opacity="0.8" TextWrapping="Wrap"
+                       Text="Вставьте ссылку на Google Spreadsheet. Слова должны идти блоками: колонка A — английское слово, B — перевод, C — разделитель, затем D и E и так далее. Заголовков быть не должно." />
+
+            <ui:TextBox Margin="0,0,0,12" PlaceholderText="https://docs.google.com/spreadsheets/d/…"
+                        Text="{Binding Url, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBlock Margin="0,0,0,4" Opacity="0.7" TextWrapping="Wrap"
+                       Text="Для входа нужен файл OAuth-ключа Google (тип Desktop app). Положите его в папку приложения под именем client_secret.json:" />
+            <TextBox Margin="0,0,0,12" IsReadOnly="True" Text="{Binding ClientSecretPath, Mode=OneWay}" />
+
+            <TextBlock Margin="0,0,0,12" Foreground="#E57373" TextWrapping="Wrap"
+                       Text="Файл client_secret.json пока не найден — без него вход в Google невозможен."
+                       Visibility="{Binding ClientSecretMissing, Converter={StaticResource BoolToVis}}" />
+
+            <TextBlock Margin="0,0,0,12" Foreground="#E57373" TextWrapping="Wrap" Text="{Binding Error}" />
+
+            <StackPanel Orientation="Horizontal">
+                <ui:Button Margin="0,0,8,0" Padding="24,10" Appearance="Primary" Command="{Binding ConnectCommand}" Content="Подключить" />
+                <ui:Button Margin="0,0,12,0" Padding="16,10" Command="{Binding CancelCommand}" Content="Отмена" />
+                <ui:ProgressRing Width="24" Height="24" IsIndeterminate="True"
+                                 Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</ui:FluentWindow>

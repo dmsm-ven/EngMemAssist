@@ -1,5 +1,81 @@
 <UserControl x:Class="EngMemAssist.Views.StatsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <TextBlock FontSize="24" Text="{Binding Title}" />
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Margin="0,0,0,16" FontSize="24" FontWeight="SemiBold" Text="Статистика" />
+
+        <UniformGrid Grid.Row="1" Margin="0,0,0,16" Columns="4">
+            <ui:Card Margin="0,0,8,0" Padding="12">
+                <StackPanel>
+                    <TextBlock FontSize="26" FontWeight="SemiBold" Text="{Binding Overview.SessionsCount}" />
+                    <TextBlock Opacity="0.7" Text="тестов пройдено" />
+                </StackPanel>
+            </ui:Card>
+            <ui:Card Margin="0,0,8,0" Padding="12">
+                <StackPanel>
+                    <TextBlock FontSize="26" FontWeight="SemiBold" Text="{Binding Overview.AnswersCount}" />
+                    <TextBlock Opacity="0.7" Text="ответов всего" />
+                </StackPanel>
+            </ui:Card>
+            <ui:Card Margin="0,0,8,0" Padding="12">
+                <StackPanel>
+                    <TextBlock FontSize="26" FontWeight="SemiBold" Text="{Binding Overview.CorrectPercent, StringFormat={}{0:0}%}" />
+                    <TextBlock Opacity="0.7" Text="верных ответов" />
+                </StackPanel>
+            </ui:Card>
+            <ui:Card Padding="12">
+                <StackPanel>
+                    <TextBlock FontSize="26" FontWeight="SemiBold" Text="{Binding Overview.ActiveWords}" />
+                    <TextBlock Opacity="0.7" Text="слов в словаре" />
+                </StackPanel>
+            </ui:Card>
+        </UniformGrid>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Margin="0,0,0,8" FontSize="16" FontWeight="SemiBold" Text="Последние тесты" />
+                <DataGrid Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
+                          CanUserAddRows="False" ItemsSource="{Binding Sessions}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Width="*" Header="Дата" Binding="{Binding StartedAtLocal}" />
+                        <DataGridTextColumn Width="Auto" Header="Результат" Binding="{Binding ScoreText}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Margin="0,0,0,8" FontSize="16" FontWeight="SemiBold" Text="Самые трудные слова" />
+                <DataGrid Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
+                          CanUserAddRows="False" ItemsSource="{Binding HardestWords}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Width="*" Header="Слово" Binding="{Binding English}" />
+                        <DataGridTextColumn Width="*" Header="Перевод" Binding="{Binding Translation}" />
+                        <DataGridTextColumn Width="Auto" Header="Ошибок" Binding="{Binding ErrorPercentText}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Grid>
+    </Grid>
 </UserControl>

@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\EngMemAssist.Core\EngMemAssist.Core.csproj" />
     <ProjectReference Include="..\EngMemAssist.Data\EngMemAssist.Data.csproj" />
+    <ProjectReference Include="..\EngMemAssist.Integrations\EngMemAssist.Integrations.csproj" />
     <ProjectReference Include="..\EngMemAssist.Nlp\EngMemAssist.Nlp.csproj" />
   </ItemGroup>
 
