@@ -4,6 +4,7 @@
                  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
                  xmlns:vm="clr-namespace:EngMemAssist.ViewModels"
                  xmlns:views="clr-namespace:EngMemAssist.Views"
+                 xmlns:infra="clr-namespace:EngMemAssist.Infrastructure"
                  Title="EngMemAssist"
                  Width="1000"
                  Height="640"
@@ -14,6 +15,8 @@
                  WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
+        <infra:BoolToAppearanceConverter x:Key="ActiveAppearance" />
+
         <!-- ViewModel -> View: страницы подбираются автоматически -->
         <DataTemplate DataType="{x:Type vm:HomeViewModel}">
             <views:HomeView />
@@ -50,10 +53,14 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0" Margin="12">
-                <ui:Button Margin="0,0,0,8" HorizontalAlignment="Stretch" Command="{Binding ShowHomeCommand}" Content="Главная" />
-                <ui:Button Margin="0,0,0,8" HorizontalAlignment="Stretch" Command="{Binding ShowWordsCommand}" Content="Список слов" />
-                <ui:Button Margin="0,0,0,8" HorizontalAlignment="Stretch" Command="{Binding ShowStatsCommand}" Content="Статистика" />
-                <ui:Button HorizontalAlignment="Stretch" Command="{Binding ShowSettingsCommand}" Content="Настройки" />
+                <ui:Button Margin="0,0,0,8" HorizontalAlignment="Stretch" Command="{Binding ShowHomeCommand}" Content="Главная"
+                           Appearance="{Binding IsHomeActive, Converter={StaticResource ActiveAppearance}}" />
+                <ui:Button Margin="0,0,0,8" HorizontalAlignment="Stretch" Command="{Binding ShowWordsCommand}" Content="Список слов"
+                           Appearance="{Binding IsWordsActive, Converter={StaticResource ActiveAppearance}}" />
+                <ui:Button Margin="0,0,0,8" HorizontalAlignment="Stretch" Command="{Binding ShowStatsCommand}" Content="Статистика"
+                           Appearance="{Binding IsStatsActive, Converter={StaticResource ActiveAppearance}}" />
+                <ui:Button HorizontalAlignment="Stretch" Command="{Binding ShowSettingsCommand}" Content="Настройки"
+                           Appearance="{Binding IsSettingsActive, Converter={StaticResource ActiveAppearance}}" />
             </StackPanel>
 
             <ContentControl Grid.Column="1" Margin="16" Content="{Binding Navigation.Current}" />

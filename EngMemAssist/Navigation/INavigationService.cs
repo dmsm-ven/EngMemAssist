@@ -1,8 +1,9 @@
+using System.ComponentModel;
 using EngMemAssist.ViewModels;
 
 namespace EngMemAssist.Navigation;
 
-public interface INavigationService
+public interface INavigationService : INotifyPropertyChanged
 {
     PageViewModelBase? Current { get; }
 

@@ -1,7 +1,8 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EngMemAssist.Core.Settings;
 using EngMemAssist.Infrastructure;
+using EngMemAssist.Navigation;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -34,6 +35,8 @@ public sealed partial class SettingsViewModel : PageViewModelBase
     }
 
     public override string Title => "Настройки";
+
+    public override NavSection Section => NavSection.Settings;
 
     public SyncCoordinator Sync { get; }
 

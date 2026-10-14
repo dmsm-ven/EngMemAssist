@@ -29,6 +29,9 @@ public sealed partial class ResultsViewModel : PageViewModelBase
 
     public override string Title => "Результаты";
 
+    /// <summary>Результаты из истории относятся к «Статистике», результаты только что пройденного теста — к «Главной».</summary>
+    public override NavSection Section => IsHistory ? NavSection.Stats : NavSection.Home;
+
     public string SummaryText => Result is null ? "" : $"Верно: {Result.CorrectCount} из {Result.Total}";
 
     [RelayCommand]

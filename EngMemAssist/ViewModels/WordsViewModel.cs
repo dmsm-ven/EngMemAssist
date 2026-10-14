@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using EngMemAssist.Core.Abstractions;
 using EngMemAssist.Core.Models;
+using EngMemAssist.Navigation;
 
 namespace EngMemAssist.ViewModels;
 
@@ -30,6 +31,8 @@ public sealed partial class WordsViewModel : PageViewModelBase
     }
 
     public override string Title => "Список слов";
+
+    public override NavSection Section => NavSection.Words;
 
     public override async Task OnNavigatedToAsync()
     {

@@ -31,6 +31,8 @@ public sealed partial class StatsViewModel : PageViewModelBase
 
     public override string Title => "Статистика";
 
+    public override NavSection Section => NavSection.Stats;
+
     public override async Task OnNavigatedToAsync()
     {
         Overview = await _quizzes.GetOverviewAsync();
