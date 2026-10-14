@@ -1,9 +1,10 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EngMemAssist.Core.Abstractions;
 using EngMemAssist.Core.Exceptions;
 using EngMemAssist.Core.Services;
 using EngMemAssist.Core.Settings;
+using System.IO;
 
 namespace EngMemAssist.ViewModels;
 

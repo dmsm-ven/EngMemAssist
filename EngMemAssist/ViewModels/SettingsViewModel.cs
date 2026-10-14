@@ -1,9 +1,10 @@
-using System.Diagnostics;
-using System.Windows;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EngMemAssist.Core.Settings;
 using EngMemAssist.Infrastructure;
+using System.Diagnostics;
+using System.IO;
+using System.Windows;
 
 namespace EngMemAssist.ViewModels;
 

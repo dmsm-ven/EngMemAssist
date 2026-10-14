@@ -1,4 +1,4 @@
-using Catalyst;
+﻿using Catalyst;
 using EngMemAssist.Core.Abstractions;
 using EngMemAssist.Core.Settings;
 using Mosaik.Core;
@@ -10,7 +10,7 @@ namespace EngMemAssist.Nlp;
 /// (первый запуск долгий: модели распаковываются в %AppData%/EngMemAssist/catalyst-models).
 /// Если модели загрузить не удалось, работает запасной лемматизатор на правилах, причина доступна в DegradedReason.
 /// </summary>
-public sealed class CatalystLemmatizer : ILemmatizer, ILemmatizerDiagnostics
+public sealed class CatalystLemmatizer : Core.Abstractions.ILemmatizer, ILemmatizerDiagnostics
 {
     private readonly object _sync = new();
     private readonly RuleBasedLemmatizer _fallback = new();
