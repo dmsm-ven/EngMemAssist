@@ -24,10 +24,33 @@ public sealed class SentenceRepository : ISentenceRepository
         await connection.OpenAsync();
         await using var transaction = await connection.BeginTransactionAsync();
 
+        // Источники: API создаются один раз, локальная база — при первом появлении своего имени.
+        var sourceIds = new Dictionary<string, long>(StringComparer.OrdinalIgnoreCase);
+        foreach (var tag in sentences.Select(s => s.Source).Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            var isLocal = tag.StartsWith("local:", StringComparison.OrdinalIgnoreCase);
+            var name = isLocal ? tag[6..] : CanonicalApiName(tag);
+            var kind = isLocal ? 1 : 0;
+
+            await connection.ExecuteAsync(
+                "INSERT OR IGNORE INTO SentenceSources (Kind, Name) VALUES (@kind, @name)",
+                new { kind, name },
+                transaction);
+            sourceIds[tag] = await connection.ExecuteScalarAsync<long>(
+                "SELECT Id FROM SentenceSources WHERE Kind = @kind AND Name = @name",
+                new { kind, name },
+                transaction);
+        }
+
+        foreach (var sentence in sentences)
+        {
+            sentence.SourceId = sourceIds[sentence.Source];
+        }
+
         var inserted = await connection.ExecuteAsync(
             """
-            INSERT OR IGNORE INTO Sentences (WordId, Text, Translation, Source, MatchStart, MatchLength)
-            VALUES (@WordId, @Text, @Translation, @Source, @MatchStart, @MatchLength)
+            INSERT OR IGNORE INTO Sentences (WordId, Text, Translation, Source, SourceId, MatchStart, MatchLength)
+            VALUES (@WordId, @Text, @Translation, @Source, @SourceId, @MatchStart, @MatchLength)
             """,
             sentences,
             transaction);
@@ -35,6 +58,14 @@ public sealed class SentenceRepository : ISentenceRepository
         await transaction.CommitAsync();
         return inserted;
     }
+
+    private static string CanonicalApiName(string tag) => tag.ToLowerInvariant() switch
+    {
+        "tatoeba" => "Tatoeba",
+        "wiktionary" => "Wiktionary",
+        "" => "Неизвестный API",
+        var other => char.ToUpperInvariant(other[0]) + other[1..],
+    };
 
     public async Task<IReadOnlyDictionary<long, int>> CountByWordAsync()
     {
@@ -60,9 +91,11 @@ public sealed class SentenceRepository : ISentenceRepository
         await using var connection = _factory.Create();
         var rows = await connection.QueryAsync<Sentence>(
             """
-            SELECT Id, WordId, Text, Translation, Source, MatchStart, MatchLength
-            FROM Sentences
-            WHERE WordId IN @ids AND MatchStart >= 0
+            SELECT s.Id, s.WordId, s.Text, s.Translation, s.Source, s.MatchStart, s.MatchLength,
+                   s.SourceId, ss.Name AS SourceName, COALESCE(ss.Kind, 0) AS SourceKind
+            FROM Sentences s
+            LEFT JOIN SentenceSources ss ON ss.Id = s.SourceId
+            WHERE s.WordId IN @ids AND s.MatchStart >= 0
             """,
             new { ids = wordIds });
         return rows.AsList();

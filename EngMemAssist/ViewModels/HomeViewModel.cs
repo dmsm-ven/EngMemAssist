@@ -19,8 +19,10 @@ public sealed partial class HomeViewModel : PageViewModelBase
     [ObservableProperty]
     private string _summary = "";
 
-    public HomeViewModel(INavigationService navigation, SyncCoordinator sync, IWordRepository words)
+    public HomeViewModel(
+        INavigationService navigation, SyncCoordinator sync, IWordRepository words, RecentSessionsViewModel recentSessions)
     {
+        RecentSessions = recentSessions;
         _navigation = navigation;
         _words = words;
         Sync = sync;
@@ -29,6 +31,8 @@ public sealed partial class HomeViewModel : PageViewModelBase
     public override string Title => "Главная";
 
     public SyncCoordinator Sync { get; }
+
+    public RecentSessionsViewModel RecentSessions { get; }
 
     public override async Task OnNavigatedToAsync()
     {
@@ -69,6 +73,7 @@ public sealed partial class HomeViewModel : PageViewModelBase
     {
         var words = await _words.GetActiveAsync();
         WordCount = words.Count;
+        await RecentSessions.LoadAsync();
         Summary = WordCount == 0 ? "В словаре пока нет слов." : $"Слов в словаре: {WordCount}";
     }
 

@@ -138,6 +138,19 @@ public sealed class QuizRepository : IQuizRepository
         public int Hint { get; set; }
     }
 
+    public async Task<IReadOnlyList<WordDifficulty>> GetWordStatsAsync()
+    {
+        await using var connection = _factory.Create();
+        var rows = await connection.QueryAsync<WordDifficulty>(
+            """
+            SELECT English, Translation, CorrectCount, WrongCount
+            FROM Words
+            WHERE IsRemoved = 0
+            ORDER BY English COLLATE NOCASE
+            """);
+        return rows.AsList();
+    }
+
     public async Task<IReadOnlyList<WordDifficulty>> GetHardestWordsAsync(int take)
     {
         await using var connection = _factory.Create();

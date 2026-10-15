@@ -38,6 +38,9 @@ public interface IQuizRepository
 
     Task<IReadOnlyList<WordDifficulty>> GetHardestWordsAsync(int take);
 
+    /// <summary>Статистика ответов по каждому слову словаря (в том числе по ещё не проверявшимся).</summary>
+    Task<IReadOnlyList<WordDifficulty>> GetWordStatsAsync();
+
     /// <summary>Таблица ответов прошедшего теста — как на экране результатов сразу после теста.</summary>
     Task<QuizResult> GetSessionResultAsync(long sessionId);
 }

@@ -40,9 +40,6 @@ public sealed partial class QuizViewModel : PageViewModelBase
     private QuizSentence? _extraSentence;
 
     [ObservableProperty]
-    private string _firstLetterText = "";
-
-    [ObservableProperty]
     private string _hintsText = "";
 
     [ObservableProperty]
@@ -54,11 +51,8 @@ public sealed partial class QuizViewModel : PageViewModelBase
 
     public bool HasExtraSentence => ExtraSentence is not null;
 
-    public bool HasFirstLetter => FirstLetterText.Length > 0;
-
     partial void OnExtraSentenceChanged(QuizSentence? value) => OnPropertyChanged(nameof(HasExtraSentence));
 
-    partial void OnFirstLetterTextChanged(string value) => OnPropertyChanged(nameof(HasFirstLetter));
 
     public QuizViewModel(IQuizService quiz, ISettingsService settings, INavigationService navigation)
     {
@@ -97,7 +91,6 @@ public sealed partial class QuizViewModel : PageViewModelBase
         VisibleOptions = Current.Options;
         CurrentHint = QuizHint.None;
         ExtraSentence = null;
-        FirstLetterText = "";
         OnPropertyChanged(nameof(CanExtraContext));
         RefreshHints();
     }
@@ -108,7 +101,6 @@ public sealed partial class QuizViewModel : PageViewModelBase
         HintsText = $"Подсказки: осталось {HintsTotal - _hintsUsed} из {HintsTotal}";
         UseFiftyFiftyCommand.NotifyCanExecuteChanged();
         UseExtraContextCommand.NotifyCanExecuteChanged();
-        UseFirstLetterCommand.NotifyCanExecuteChanged();
     }
 
     private bool CanUseHint() =>
@@ -148,18 +140,6 @@ public sealed partial class QuizViewModel : PageViewModelBase
 
         ExtraSentence = Current.ExtraSentenceList[0];
         TakeHint(QuizHint.ExtraContext);
-    }
-
-    [RelayCommand(CanExecute = nameof(CanUseHint))]
-    private void UseFirstLetter()
-    {
-        if (Current is null || Current.CorrectOption.Length == 0)
-        {
-            return;
-        }
-
-        FirstLetterText = $"Ответ начинается на «{char.ToUpperInvariant(Current.CorrectOption[0])}…» ({Current.CorrectOption.Length} букв)";
-        TakeHint(QuizHint.FirstLetter);
     }
 
     [RelayCommand]

@@ -15,6 +15,9 @@ public sealed partial class SyncCoordinator : ObservableObject
 {
     private const string AppTitle = "EngMemAssist";
 
+    /// <summary>Автосинхронизация при старте не чаще, чем раз в это время.</summary>
+    private static readonly TimeSpan StartupSyncInterval = TimeSpan.FromMinutes(30);
+
     private readonly IWordSyncService _sync;
     private readonly ISettingsService _settings;
     private readonly IDialogService _dialogs;
@@ -65,6 +68,14 @@ public sealed partial class SyncCoordinator : ObservableObject
             }
         }
 
+        if (_settings.Current.LastSyncAt is { } last && DateTime.UtcNow - last < StartupSyncInterval)
+        {
+            var minutes = Math.Max(0, (int)(DateTime.UtcNow - last).TotalMinutes);
+            Status = $"Слова актуальны: последняя синхронизация была {minutes} мин назад. Нажмите «Синхронизировать», чтобы обновить сейчас.";
+            Completed?.Invoke(this, EventArgs.Empty);
+            return;
+        }
+
         await SyncAsync();
     }
 
@@ -100,6 +111,13 @@ public sealed partial class SyncCoordinator : ObservableObject
             var result = await _sync.SyncAsync(progress);
 
             Status = BuildStatus(result);
+
+            // Время фиксируем только после полностью успешного обхода: при лимите запросов или ошибках повтор нужен при следующем старте.
+            if (!result.RateLimited && result.FailedWords == 0)
+            {
+                _settings.Current.LastSyncAt = DateTime.UtcNow;
+                _settings.Save();
+            }
 
             if (result.RateLimited)
             {

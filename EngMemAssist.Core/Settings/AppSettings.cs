@@ -5,6 +5,9 @@ public sealed class AppSettings
     /// <summary>Ссылка на Google Spreadsheet. Пусто — при старте покажем окно подключения.</summary>
     public string? SpreadsheetUrl { get; set; }
 
+    /// <summary>Когда последний раз успешно завершилась синхронизация со таблицей (UTC). При старте не синхронизируемся, если прошло меньше 30 минут.</summary>
+    public DateTime? LastSyncAt { get; set; }
+
     public string Theme { get; set; } = "Dark";
 
     /// <summary>Имя файла фонового изображения в папке приложения (null — фона нет).</summary>

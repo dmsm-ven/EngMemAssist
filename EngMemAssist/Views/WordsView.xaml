@@ -29,8 +29,6 @@
                     <DataGridTextColumn Width="*" Header="Слово" Binding="{Binding English}" />
                     <DataGridTextColumn Width="*" Header="Перевод" Binding="{Binding Translation}" />
                     <DataGridTextColumn Width="Auto" Header="Предложений" Binding="{Binding SentenceCount}" />
-                    <DataGridTextColumn Width="Auto" Header="Верно" Binding="{Binding CorrectCount}" />
-                    <DataGridTextColumn Width="Auto" Header="Ошибок" Binding="{Binding WrongCount}" />
                 </DataGrid.Columns>
             </DataGrid>
 

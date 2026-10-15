@@ -1,4 +1,4 @@
-﻿using EngMemAssist.Core.Services;
+using EngMemAssist.Core.Services;
 using EngMemAssist.Core.Settings;
 using EngMemAssist.Data;
 using EngMemAssist.Infrastructure;
@@ -94,6 +94,7 @@ public partial class App : Application
         services.AddSingleton<MainWindow>();
         services.AddSingleton<MainViewModel>();
 
+        services.AddTransient<RecentSessionsViewModel>();
         services.AddTransient<HomeViewModel>();
         services.AddTransient<QuizViewModel>();
         services.AddTransient<ResultsViewModel>();

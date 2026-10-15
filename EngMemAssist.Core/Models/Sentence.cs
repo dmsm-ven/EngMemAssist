@@ -16,6 +16,20 @@ public sealed class Sentence
 
     public int MatchLength { get; set; }
 
+    /// <summary>Ссылка на SentenceSources.Id (заполняется при сохранении по значению <see cref="Source"/>).</summary>
+    public long? SourceId { get; set; }
+
+    /// <summary>Название источника из справочника (только при чтении из БД).</summary>
+    public string? SourceName { get; set; }
+
+    /// <summary>0 — внешний API, 1 — локальная текстовая база (только при чтении из БД).</summary>
+    public int SourceKind { get; set; }
+
+    /// <summary>Подпись источника для подсказки в квизе.</summary>
+    public string SourceLabel => string.IsNullOrEmpty(SourceName)
+        ? "Источник неизвестен"
+        : SourceKind == 1 ? $"Локальная текстовая база «{SourceName}»" : $"API: {SourceName}";
+
     public bool HasValidMatch =>
         MatchStart >= 0 && MatchLength > 0 && MatchStart + MatchLength <= Text.Length;
 }

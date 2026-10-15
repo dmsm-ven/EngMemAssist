@@ -1,7 +1,7 @@
 namespace EngMemAssist.Core.Models;
 
 /// <summary>Предложение со словом, выделенным в тексте (для подсказки «ещё одно предложение»).</summary>
-public sealed record QuizSentence(string Text, int MatchStart, int MatchLength)
+public sealed record QuizSentence(string Text, int MatchStart, int MatchLength, string? SourceText = null)
 {
     public string Before => Slice(Text, 0, MatchStart);
 
@@ -28,7 +28,8 @@ public sealed record QuizQuestion(
     IReadOnlyList<string> Options,
     string CorrectOption,
     string AllTranslations,
-    IReadOnlyList<QuizSentence>? ExtraSentences = null)
+    IReadOnlyList<QuizSentence>? ExtraSentences = null,
+    string? SourceText = null)
 {
     public string Before => QuizSentence.Slice(SentenceText, 0, MatchStart);
 

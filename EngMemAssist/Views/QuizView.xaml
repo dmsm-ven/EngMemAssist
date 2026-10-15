@@ -30,24 +30,20 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Margin="0,0,0,16" FontSize="24" TextWrapping="Wrap"><Run Text="{Binding Current.Before, Mode=OneWay}" /><Run FontWeight="Bold" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" Text="{Binding Current.Highlighted, Mode=OneWay}" /><Run Text="{Binding Current.After, Mode=OneWay}" /></TextBlock>
+            <TextBlock Grid.Row="0" Margin="0,0,0,16" FontSize="24" TextWrapping="Wrap"><Run Text="{Binding Current.Before, Mode=OneWay}" /><Run FontWeight="Bold" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" Text="{Binding Current.Highlighted, Mode=OneWay}" /><Run Text="{Binding Current.After, Mode=OneWay}" /><InlineUIContainer BaselineAlignment="Center"><Border Width="22" Height="22" Margin="10,0,0,0" Background="Transparent" BorderBrush="{DynamicResource TextFillColorSecondaryBrush}" BorderThickness="1" CornerRadius="11" Cursor="Help" ToolTipService.InitialShowDelay="100" ToolTip="{Binding DataContext.Current.SourceText, RelativeSource={RelativeSource AncestorType=UserControl}}"><TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" Opacity="0.7" Text="?" /></Border></InlineUIContainer></TextBlock>
 
             <StackPanel Grid.Row="1" Margin="0,0,0,16" Visibility="{Binding HasHints, Converter={StaticResource BoolToVisibility}}">
                 <StackPanel Orientation="Horizontal">
                     <ui:Button Width="48" Height="48" Margin="0,0,8,0" Padding="0" FontSize="22"
                                Command="{Binding UseFiftyFiftyCommand}" Content="½" ToolTip="Убрать половину неверных вариантов" />
-                    <ui:Button Width="48" Height="48" Margin="0,0,8,0" Padding="0" FontSize="22"
+                    <ui:Button Width="48" Height="48" Padding="0" FontSize="22"
                                Command="{Binding UseExtraContextCommand}" Content="💬" ToolTip="Показать ещё одно предложение со словом" />
-                    <ui:Button Width="48" Height="48" Margin="0,0,0,0" Padding="0" FontSize="22"
-                               Command="{Binding UseFirstLetterCommand}" Content="🔤" ToolTip="Показать первую букву ответа" />
                 </StackPanel>
             </StackPanel>
 
             <StackPanel Grid.Row="2" Margin="0,0,0,16">
                 <TextBlock Margin="0,0,0,4" FontSize="18" Opacity="0.85" TextWrapping="Wrap"
-                           Visibility="{Binding HasExtraSentence, Converter={StaticResource BoolToVisibility}}"><Run Text="{Binding ExtraSentence.Before, Mode=OneWay}" /><Run FontWeight="Bold" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" Text="{Binding ExtraSentence.Highlighted, Mode=OneWay}" /><Run Text="{Binding ExtraSentence.After, Mode=OneWay}" /></TextBlock>
-                <TextBlock FontSize="16" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" Text="{Binding FirstLetterText}"
-                           Visibility="{Binding HasFirstLetter, Converter={StaticResource BoolToVisibility}}" />
+                           Visibility="{Binding HasExtraSentence, Converter={StaticResource BoolToVisibility}}"><Run Text="{Binding ExtraSentence.Before, Mode=OneWay}" /><Run FontWeight="Bold" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" Text="{Binding ExtraSentence.Highlighted, Mode=OneWay}" /><Run Text="{Binding ExtraSentence.After, Mode=OneWay}" /><InlineUIContainer BaselineAlignment="Center"><Border Width="22" Height="22" Margin="10,0,0,0" Background="Transparent" BorderBrush="{DynamicResource TextFillColorSecondaryBrush}" BorderThickness="1" CornerRadius="11" Cursor="Help" ToolTipService.InitialShowDelay="100" ToolTip="{Binding DataContext.ExtraSentence.SourceText, RelativeSource={RelativeSource AncestorType=UserControl}}"><TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" Opacity="0.7" Text="?" /></Border></InlineUIContainer></TextBlock>
             </StackPanel>
 
             <ItemsControl Grid.Row="3" ItemsSource="{Binding VisibleOptions}">

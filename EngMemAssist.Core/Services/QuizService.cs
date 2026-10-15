@@ -47,7 +47,7 @@ public sealed class QuizService : IQuizService
                 .Where(s => s.Id != sentence.Id)
                 .OrderBy(_ => Random.Shared.Next())
                 .Take(3)
-                .Select(s => new QuizSentence(s.Text, s.MatchStart, s.MatchLength))
+                .Select(s => new QuizSentence(s.Text, s.MatchStart, s.MatchLength, s.SourceLabel))
                 .ToList();
             var translations = word.GetTranslations();
             var correct = Pick(translations);
@@ -65,7 +65,8 @@ public sealed class QuizService : IQuizService
                 options,
                 correct,
                 word.Translation,
-                extra));
+                extra,
+                sentence.SourceLabel));
         }
 
         return questions;
