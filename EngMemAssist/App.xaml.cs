@@ -1,5 +1,4 @@
-using System.Windows;
-using EngMemAssist.Core.Services;
+﻿using EngMemAssist.Core.Services;
 using EngMemAssist.Core.Settings;
 using EngMemAssist.Data;
 using EngMemAssist.Infrastructure;
@@ -10,6 +9,7 @@ using EngMemAssist.ViewModels;
 using EngMemAssist.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Windows;
 
 namespace EngMemAssist;
 
@@ -88,7 +88,7 @@ public partial class App : Application
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<SyncCoordinator>();
 
-        services.AddSingleton<BackgroundService>();
+        services.AddSingleton<AppBackgroundService>();
         services.AddSingleton<MainWindow>();
         services.AddSingleton<MainViewModel>();
 

@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EngMemAssist.Infrastructure;
@@ -10,7 +10,7 @@ public sealed partial class MainViewModel : ObservableObject
 {
     private readonly INavigationService _navigation;
 
-    public MainViewModel(INavigationService navigation, BackgroundService background)
+    public MainViewModel(INavigationService navigation, AppBackgroundService background)
     {
         _navigation = navigation;
         Background = background;
@@ -18,7 +18,7 @@ public sealed partial class MainViewModel : ObservableObject
     }
 
     /// <summary>Фон окна (картинка и подложка).</summary>
-    public BackgroundService Background { get; }
+    public AppBackgroundService Background { get; }
 
     /// <summary>Сервис навигации; Content окна привязан к его Current.</summary>
     public INavigationService Navigation => _navigation;

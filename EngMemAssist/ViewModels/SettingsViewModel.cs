@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EngMemAssist.Core.Settings;
 using EngMemAssist.Infrastructure;
@@ -29,7 +29,7 @@ public sealed partial class SettingsViewModel : PageViewModelBase
     [ObservableProperty]
     private string _backgroundOverlayColor = "#000000";
 
-    public SettingsViewModel(ISettingsService settings, SyncCoordinator sync, BackgroundService background)
+    public SettingsViewModel(ISettingsService settings, SyncCoordinator sync, AppBackgroundService background)
     {
         _settings = settings;
         Sync = sync;
@@ -49,9 +49,9 @@ public sealed partial class SettingsViewModel : PageViewModelBase
 
     public SyncCoordinator Sync { get; }
 
-    public BackgroundService Background { get; }
+    public AppBackgroundService Background { get; }
 
-    public ColorPreset[] OverlayColors => BackgroundService.Presets;
+    public ColorPreset[] OverlayColors => AppBackgroundService.Presets;
 
     partial void OnBackgroundOpacityPercentChanged(double value)
     {

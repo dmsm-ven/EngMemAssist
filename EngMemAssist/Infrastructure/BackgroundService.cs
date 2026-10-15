@@ -1,15 +1,15 @@
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using EngMemAssist.Core.Settings;
 using System.IO;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using CommunityToolkit.Mvvm.ComponentModel;
-using EngMemAssist.Core.Settings;
 
 namespace EngMemAssist.Infrastructure;
 
 public sealed record ColorPreset(string Name, string Hex);
 
 /// <summary>Фон приложения: картинка из %AppData% поверх цветной подложки. Все значения берутся из настроек.</summary>
-public sealed partial class BackgroundService : ObservableObject
+public sealed partial class AppBackgroundService : ObservableObject
 {
     public static readonly ColorPreset[] Presets =
     [
@@ -31,7 +31,7 @@ public sealed partial class BackgroundService : ObservableObject
     [ObservableProperty]
     private Brush _overlayBrush = Brushes.Black;
 
-    public BackgroundService(ISettingsService settings)
+    public AppBackgroundService(ISettingsService settings)
     {
         _settings = settings;
         Reload();
