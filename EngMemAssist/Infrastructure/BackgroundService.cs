@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using EngMemAssist.Core.Settings;
 using System.IO;
 using System.Windows.Media;
@@ -24,6 +24,12 @@ public sealed partial class AppBackgroundService : ObservableObject
 
     [ObservableProperty]
     private ImageSource? _image;
+
+    [ObservableProperty]
+    private Brush? _imageBrush;
+
+    [ObservableProperty]
+    private bool _tile;
 
     [ObservableProperty]
     private double _imageOpacity;
@@ -65,6 +71,14 @@ public sealed partial class AppBackgroundService : ObservableObject
         Reload();
     }
 
+    public void SetTile(bool value)
+    {
+        _settings.Current.BackgroundTile = value;
+        _settings.Save();
+        Tile = value;
+        ImageBrush = CreateBrush(Image, value);
+    }
+
     public void SetOpacity(double value)
     {
         _settings.Current.BackgroundOpacity = Math.Clamp(value, 0, 1);
@@ -85,6 +99,35 @@ public sealed partial class AppBackgroundService : ObservableObject
         ImageOpacity = Math.Clamp(s.BackgroundOpacity, 0, 1);
         OverlayBrush = ParseBrush(s.BackgroundOverlayColor);
         Image = LoadImage(s.BackgroundImageFile);
+        Tile = s.BackgroundTile;
+        ImageBrush = CreateBrush(Image, Tile);
+    }
+
+    /// <summary>Кисть с картинкой: либо на всё окно с обрезкой, либо мозаика в исходном размере (с учётом DPI).</summary>
+    private static Brush? CreateBrush(ImageSource? image, bool tile)
+    {
+        if (image is not BitmapSource bitmap)
+        {
+            return null;
+        }
+
+        var brush = new ImageBrush(bitmap);
+        if (tile)
+        {
+            var width = bitmap.PixelWidth * 96.0 / bitmap.DpiX;
+            var height = bitmap.PixelHeight * 96.0 / bitmap.DpiY;
+            brush.TileMode = TileMode.Tile;
+            brush.Stretch = Stretch.Fill;
+            brush.ViewportUnits = BrushMappingMode.Absolute;
+            brush.Viewport = new System.Windows.Rect(0, 0, width, height);
+        }
+        else
+        {
+            brush.Stretch = Stretch.UniformToFill;
+        }
+
+        brush.Freeze();
+        return brush;
     }
 
     private void RemoveFile()

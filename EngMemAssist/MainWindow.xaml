@@ -50,7 +50,7 @@
         <Grid Grid.RowSpan="2" Panel.ZIndex="-1" IsHitTestVisible="False"
               Visibility="{Binding Background.HasImage, Converter={StaticResource BoolToVis}}">
             <Rectangle Fill="{Binding Background.OverlayBrush}" />
-            <Image Opacity="{Binding Background.ImageOpacity}" Source="{Binding Background.Image}" Stretch="UniformToFill" />
+            <Rectangle Opacity="{Binding Background.ImageOpacity}" Fill="{Binding Background.ImageBrush}" />
         </Grid>
 
         <ui:TitleBar Grid.Row="0" Title="EngMemAssist">

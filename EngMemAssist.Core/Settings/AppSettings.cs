@@ -10,6 +10,9 @@ public sealed class AppSettings
     /// <summary>Имя файла фонового изображения в папке приложения (null — фона нет).</summary>
     public string? BackgroundImageFile { get; set; }
 
+    /// <summary>Замостить окно картинкой (для небольших бесшовных текстур) вместо растяжения.</summary>
+    public bool BackgroundTile { get; set; }
+
     /// <summary>Непрозрачность изображения поверх цвета подложки, 0..1.</summary>
     public double BackgroundOpacity { get; set; } = 0.4;
 

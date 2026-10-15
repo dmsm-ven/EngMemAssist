@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EngMemAssist.Core.Settings;
 using EngMemAssist.Infrastructure;
@@ -27,6 +27,9 @@ public sealed partial class SettingsViewModel : PageViewModelBase
     private double _backgroundOpacityPercent;
 
     [ObservableProperty]
+    private bool _backgroundTile;
+
+    [ObservableProperty]
     private string _backgroundOverlayColor = "#000000";
 
     public SettingsViewModel(ISettingsService settings, SyncCoordinator sync, AppBackgroundService background)
@@ -36,6 +39,7 @@ public sealed partial class SettingsViewModel : PageViewModelBase
         Background = background;
         BackgroundOpacityPercent = Math.Round(settings.Current.BackgroundOpacity * 100);
         BackgroundOverlayColor = settings.Current.BackgroundOverlayColor;
+        BackgroundTile = settings.Current.BackgroundTile;
 
         SpreadsheetUrl = settings.Current.SpreadsheetUrl ?? "";
         QuestionCount = settings.Current.QuizQuestionCount;
@@ -58,6 +62,14 @@ public sealed partial class SettingsViewModel : PageViewModelBase
         if (!_loading)
         {
             Background.SetOpacity(value / 100.0);
+        }
+    }
+
+    partial void OnBackgroundTileChanged(bool value)
+    {
+        if (!_loading)
+        {
+            Background.SetTile(value);
         }
     }
 
