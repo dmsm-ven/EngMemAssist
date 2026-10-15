@@ -1,4 +1,4 @@
-<UserControl x:Class="EngMemAssist.Views.SettingsView"
+﻿<UserControl x:Class="EngMemAssist.Views.SettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
@@ -29,65 +29,66 @@
         <ComboBox Width="120" Margin="0,0,0,24" HorizontalAlignment="Left"
                   ItemsSource="{Binding ThemeOptions}" SelectedItem="{Binding Theme}" />
 
-        <ui:Card Padding="16" Margin="0,0,0,16">
-            <StackPanel>
-                <TextBlock Margin="0,0,0,4" FontSize="16" FontWeight="SemiBold" Text="Локальные источники предложений" />
-                <TextBlock Margin="0,0,0,12" Opacity="0.7" TextWrapping="Wrap"
-                           Text="Файлы .txt: одна строка — одно предложение. Ищутся раньше внешнего API; если найдено 4 и больше предложений, API не запрашивается." />
+        <ui:CardExpander Header="Локальные источники предложений">
+            <ui:Card Padding="16" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock Margin="0,0,0,12" Opacity="0.7" TextWrapping="Wrap"
+                   Text="Файлы .txt: одна строка — одно предложение. Ищутся раньше внешнего API; если найдено 4 и больше предложений, API не запрашивается." />
 
-                <ItemsControl ItemsSource="{Binding LocalSources}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Grid Margin="0,0,0,4">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="90" />
-                                    <ColumnDefinition Width="110" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" />
-                                <TextBlock Grid.Column="1" VerticalAlignment="Center" Opacity="0.7" Text="{Binding SizeText}" />
-                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Opacity="0.7" Text="{Binding LinesText}" />
-                                <ui:Button Grid.Column="3" Icon="{ui:SymbolIcon Delete24}" ToolTip="Удалить источник"
-                                           Command="{Binding DataContext.RemoveSourceCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                           CommandParameter="{Binding}" />
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                    <ItemsControl ItemsSource="{Binding LocalSources}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,0,0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="90" />
+                                        <ColumnDefinition Width="110" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Column="1" VerticalAlignment="Center" Opacity="0.7" Text="{Binding SizeText}" />
+                                    <TextBlock Grid.Column="2" VerticalAlignment="Center" Opacity="0.7" Text="{Binding LinesText}" />
+                                    <ui:Button Grid.Column="3" Icon="{ui:SymbolIcon Delete24}" ToolTip="Удалить источник"
+                                   Command="{Binding DataContext.RemoveSourceCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                   CommandParameter="{Binding}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
 
-                <ui:Button Margin="0,8,0,8" Width="40" Command="{Binding AddSourceCommand}" Content="+" ToolTip="Добавить .txt-файл" />
-                <TextBlock Margin="0,0,0,12" Opacity="0.7" Text="{Binding LocalSourcesSummary}" />
+                    <ui:Button Margin="0,8,0,8" Width="40" Command="{Binding AddSourceCommand}" Content="+" ToolTip="Добавить .txt-файл" />
+                    <TextBlock Margin="0,0,0,12" Opacity="0.7" Text="{Binding LocalSourcesSummary}" />
 
-                <ui:Button Command="{Binding SupplementFromSourcesCommand}" Content="Дополнить из источников"
-                           IsEnabled="{Binding Sync.IsNotBusy}"
-                           ToolTip="Обойти все слова и добавить недостающие предложения из локальных файлов" />
-                <TextBlock Margin="0,8,0,0" Opacity="0.7" TextWrapping="Wrap" Text="{Binding Sync.Status}"
-                           Visibility="{Binding Sync.IsBusy, Converter={StaticResource BoolToVis}}" />
-            </StackPanel>
-        </ui:Card>
-
-        <ui:Card Padding="16" Margin="0,0,0,16">
-            <StackPanel>
-            <TextBlock Margin="0,0,0,12" FontSize="16" FontWeight="SemiBold" Text="Фоновое изображение" />
-            <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
-                <ui:Button Margin="0,0,8,0" Command="{Binding ChooseBackgroundCommand}" Content="Выбрать файл…" />
-                <ui:Button Command="{Binding ClearBackgroundCommand}" Content="Убрать фон" />
-            </StackPanel>
-            <CheckBox Margin="0,0,0,8" Content="Замостить окно (бесшовная текстура, для маленьких картинок)"
-                      IsChecked="{Binding BackgroundTile}" />
-            <StackPanel Margin="0,0,0,8" IsEnabled="{Binding BackgroundTile}">
-                <TextBlock Margin="0,0,0,4" Opacity="0.7" Text="{Binding BackgroundTileScalePercent, StringFormat=Размер плитки: {0:0}%}" />
-                <Slider Width="300" HorizontalAlignment="Left" Minimum="10" Maximum="200" TickFrequency="5"
-                        IsSnapToTickEnabled="True" Value="{Binding BackgroundTileScalePercent}" />
-            </StackPanel>
-            <TextBlock Margin="0,0,0,4" Opacity="0.7" Text="{Binding BackgroundOpacityPercent, StringFormat=Непрозрачность изображения: {0:0}%}" />
-            <Slider Width="300" Margin="0,0,0,8" HorizontalAlignment="Left" Minimum="0" Maximum="100" TickFrequency="5"
-                    IsSnapToTickEnabled="True" Value="{Binding BackgroundOpacityPercent}" />
-            <TextBlock Margin="0,0,0,4" Opacity="0.7" Text="Цвет подложки" />
-            <ComboBox Width="200" HorizontalAlignment="Left" ItemsSource="{Binding OverlayColors}"
-                      DisplayMemberPath="Name" SelectedValuePath="Hex" SelectedValue="{Binding BackgroundOverlayColor}" />
-            </StackPanel>
-        </ui:Card>
+                    <ui:Button Command="{Binding SupplementFromSourcesCommand}" Content="Дополнить из источников"
+                   IsEnabled="{Binding Sync.IsNotBusy}"
+                   ToolTip="Обойти все слова и добавить недостающие предложения из локальных файлов" />
+                    <TextBlock Margin="0,8,0,0" Opacity="0.7" TextWrapping="Wrap" Text="{Binding Sync.Status}"
+                   Visibility="{Binding Sync.IsBusy, Converter={StaticResource BoolToVis}}" />
+                </StackPanel>
+            </ui:Card>
+        </ui:CardExpander>
+        <ui:CardExpander Header="Фоновое изображение">
+            <ui:Card Padding="16" Margin="0,0,0,16">
+                <StackPanel>
+                    <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
+                        <ui:Button Margin="0,0,8,0" Command="{Binding ChooseBackgroundCommand}" Content="Выбрать файл…" />
+                        <ui:Button Command="{Binding ClearBackgroundCommand}" Content="Убрать фон" />
+                    </StackPanel>
+                    <CheckBox Margin="0,0,0,8" Content="Замостить окно (бесшовная текстура, для маленьких картинок)"
+              IsChecked="{Binding BackgroundTile}" />
+                    <StackPanel Margin="0,0,0,8" IsEnabled="{Binding BackgroundTile}">
+                        <TextBlock Margin="0,0,0,4" Opacity="0.7" Text="{Binding BackgroundTileScalePercent, StringFormat=Размер плитки: {0:0}%}" />
+                        <Slider Width="300" HorizontalAlignment="Left" Minimum="10" Maximum="200" TickFrequency="5"
+                IsSnapToTickEnabled="True" Value="{Binding BackgroundTileScalePercent}" />
+                    </StackPanel>
+                    <TextBlock Margin="0,0,0,4" Opacity="0.7" Text="{Binding BackgroundOpacityPercent, StringFormat=Непрозрачность изображения: {0:0}%}" />
+                    <Slider Width="300" Margin="0,0,0,8" HorizontalAlignment="Left" Minimum="0" Maximum="100" TickFrequency="5"
+            IsSnapToTickEnabled="True" Value="{Binding BackgroundOpacityPercent}" />
+                    <TextBlock Margin="0,0,0,4" Opacity="0.7" Text="Цвет подложки" />
+                    <ComboBox Width="200" HorizontalAlignment="Left" ItemsSource="{Binding OverlayColors}"
+              DisplayMemberPath="Name" SelectedValuePath="Hex" SelectedValue="{Binding BackgroundOverlayColor}" />
+                </StackPanel>
+            </ui:Card>
+        </ui:CardExpander>
     </StackPanel>
 </UserControl>
