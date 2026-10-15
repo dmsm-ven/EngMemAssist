@@ -76,7 +76,14 @@ public sealed partial class AppBackgroundService : ObservableObject
         _settings.Current.BackgroundTile = value;
         _settings.Save();
         Tile = value;
-        ImageBrush = CreateBrush(Image, value);
+        ImageBrush = CreateBrush(Image, value, _settings.Current.BackgroundTileScale);
+    }
+
+    public void SetTileScale(double value)
+    {
+        _settings.Current.BackgroundTileScale = Math.Clamp(value, 0.05, 4);
+        _settings.Save();
+        ImageBrush = CreateBrush(Image, Tile, _settings.Current.BackgroundTileScale);
     }
 
     public void SetOpacity(double value)
@@ -100,11 +107,11 @@ public sealed partial class AppBackgroundService : ObservableObject
         OverlayBrush = ParseBrush(s.BackgroundOverlayColor);
         Image = LoadImage(s.BackgroundImageFile);
         Tile = s.BackgroundTile;
-        ImageBrush = CreateBrush(Image, Tile);
+        ImageBrush = CreateBrush(Image, Tile, s.BackgroundTileScale);
     }
 
     /// <summary>Кисть с картинкой: либо на всё окно с обрезкой, либо мозаика в исходном размере (с учётом DPI).</summary>
-    private static Brush? CreateBrush(ImageSource? image, bool tile)
+    private static Brush? CreateBrush(ImageSource? image, bool tile, double scale)
     {
         if (image is not BitmapSource bitmap)
         {
@@ -114,8 +121,9 @@ public sealed partial class AppBackgroundService : ObservableObject
         var brush = new ImageBrush(bitmap);
         if (tile)
         {
-            var width = bitmap.PixelWidth * 96.0 / bitmap.DpiX;
-            var height = bitmap.PixelHeight * 96.0 / bitmap.DpiY;
+            scale = Math.Clamp(scale, 0.05, 4);
+            var width = bitmap.PixelWidth * 96.0 / bitmap.DpiX * scale;
+            var height = bitmap.PixelHeight * 96.0 / bitmap.DpiY * scale;
             brush.TileMode = TileMode.Tile;
             brush.Stretch = Stretch.Fill;
             brush.ViewportUnits = BrushMappingMode.Absolute;

@@ -13,6 +13,9 @@ public sealed class AppSettings
     /// <summary>Замостить окно картинкой (для небольших бесшовных текстур) вместо растяжения.</summary>
     public bool BackgroundTile { get; set; }
 
+    /// <summary>Масштаб плитки при замощении: 1 — исходный размер, 0.5 — вдвое меньше.</summary>
+    public double BackgroundTileScale { get; set; } = 1.0;
+
     /// <summary>Непрозрачность изображения поверх цвета подложки, 0..1.</summary>
     public double BackgroundOpacity { get; set; } = 0.4;
 

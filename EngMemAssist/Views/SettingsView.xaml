@@ -13,6 +13,10 @@
             <ui:Button Command="{Binding SignOutGoogleCommand}" Content="Выйти из аккаунта Google" />
         </StackPanel>
 
+        <TextBlock Margin="0,0,0,4" Text="Файлы приложения" />
+        <TextBlock Margin="0,0,0,8" Opacity="0.7" TextWrapping="Wrap"
+                   Text="{Binding ClientSecretPath, StringFormat=OAuth-ключ Google (client_secret.json): {0}}" />
+        <ui:Button Margin="0,0,0,24" Command="{Binding OpenDataFolderCommand}" Content="Открыть папку" />
         <TextBlock Margin="0,0,0,4" Text="Вопросов в одном квизе" />
         <ComboBox Width="120" Margin="0,0,0,24" HorizontalAlignment="Left"
                   ItemsSource="{Binding QuestionCountOptions}" SelectedItem="{Binding QuestionCount}" />
@@ -21,23 +25,27 @@
         <ComboBox Width="120" Margin="0,0,0,24" HorizontalAlignment="Left"
                   ItemsSource="{Binding ThemeOptions}" SelectedItem="{Binding Theme}" />
 
-        <TextBlock Margin="0,0,0,4" Text="Фоновое изображение" />
-        <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
-            <ui:Button Margin="0,0,8,0" Command="{Binding ChooseBackgroundCommand}" Content="Выбрать файл…" />
-            <ui:Button Command="{Binding ClearBackgroundCommand}" Content="Убрать фон" />
-        </StackPanel>
-        <CheckBox Margin="0,0,0,8" Content="Замостить окно (бесшовная текстура, для маленьких картинок)"
-                  IsChecked="{Binding BackgroundTile}" />
-        <TextBlock Margin="0,0,0,4" Opacity="0.7" Text="{Binding BackgroundOpacityPercent, StringFormat=Непрозрачность изображения: {0:0}%}" />
-        <Slider Width="300" Margin="0,0,0,8" HorizontalAlignment="Left" Minimum="0" Maximum="100" TickFrequency="5"
-                IsSnapToTickEnabled="True" Value="{Binding BackgroundOpacityPercent}" />
-        <TextBlock Margin="0,0,0,4" Opacity="0.7" Text="Цвет подложки" />
-        <ComboBox Width="200" Margin="0,0,0,24" HorizontalAlignment="Left" ItemsSource="{Binding OverlayColors}"
-                  DisplayMemberPath="Name" SelectedValuePath="Hex" SelectedValue="{Binding BackgroundOverlayColor}" />
-
-        <TextBlock Margin="0,0,0,4" Text="Файлы приложения" />
-        <TextBlock Margin="0,0,0,8" Opacity="0.7" TextWrapping="Wrap"
-                   Text="{Binding ClientSecretPath, StringFormat=OAuth-ключ Google (client_secret.json): {0}}" />
-        <ui:Button Command="{Binding OpenDataFolderCommand}" Content="Открыть папку" />
+        <ui:Card Padding="16" Margin="0,0,0,16">
+            <StackPanel>
+            <TextBlock Margin="0,0,0,12" FontSize="16" FontWeight="SemiBold" Text="Фоновое изображение" />
+            <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
+                <ui:Button Margin="0,0,8,0" Command="{Binding ChooseBackgroundCommand}" Content="Выбрать файл…" />
+                <ui:Button Command="{Binding ClearBackgroundCommand}" Content="Убрать фон" />
+            </StackPanel>
+            <CheckBox Margin="0,0,0,8" Content="Замостить окно (бесшовная текстура, для маленьких картинок)"
+                      IsChecked="{Binding BackgroundTile}" />
+            <StackPanel Margin="0,0,0,8" IsEnabled="{Binding BackgroundTile}">
+                <TextBlock Margin="0,0,0,4" Opacity="0.7" Text="{Binding BackgroundTileScalePercent, StringFormat=Размер плитки: {0:0}%}" />
+                <Slider Width="300" HorizontalAlignment="Left" Minimum="10" Maximum="200" TickFrequency="5"
+                        IsSnapToTickEnabled="True" Value="{Binding BackgroundTileScalePercent}" />
+            </StackPanel>
+            <TextBlock Margin="0,0,0,4" Opacity="0.7" Text="{Binding BackgroundOpacityPercent, StringFormat=Непрозрачность изображения: {0:0}%}" />
+            <Slider Width="300" Margin="0,0,0,8" HorizontalAlignment="Left" Minimum="0" Maximum="100" TickFrequency="5"
+                    IsSnapToTickEnabled="True" Value="{Binding BackgroundOpacityPercent}" />
+            <TextBlock Margin="0,0,0,4" Opacity="0.7" Text="Цвет подложки" />
+            <ComboBox Width="200" HorizontalAlignment="Left" ItemsSource="{Binding OverlayColors}"
+                      DisplayMemberPath="Name" SelectedValuePath="Hex" SelectedValue="{Binding BackgroundOverlayColor}" />
+            </StackPanel>
+        </ui:Card>
     </StackPanel>
 </UserControl>

@@ -30,6 +30,9 @@ public sealed partial class SettingsViewModel : PageViewModelBase
     private bool _backgroundTile;
 
     [ObservableProperty]
+    private double _backgroundTileScalePercent = 100;
+
+    [ObservableProperty]
     private string _backgroundOverlayColor = "#000000";
 
     public SettingsViewModel(ISettingsService settings, SyncCoordinator sync, AppBackgroundService background)
@@ -40,6 +43,7 @@ public sealed partial class SettingsViewModel : PageViewModelBase
         BackgroundOpacityPercent = Math.Round(settings.Current.BackgroundOpacity * 100);
         BackgroundOverlayColor = settings.Current.BackgroundOverlayColor;
         BackgroundTile = settings.Current.BackgroundTile;
+        BackgroundTileScalePercent = Math.Round(settings.Current.BackgroundTileScale * 100);
 
         SpreadsheetUrl = settings.Current.SpreadsheetUrl ?? "";
         QuestionCount = settings.Current.QuizQuestionCount;
@@ -62,6 +66,14 @@ public sealed partial class SettingsViewModel : PageViewModelBase
         if (!_loading)
         {
             Background.SetOpacity(value / 100.0);
+        }
+    }
+
+    partial void OnBackgroundTileScalePercentChanged(double value)
+    {
+        if (!_loading)
+        {
+            Background.SetTileScale(value / 100.0);
         }
     }
 
