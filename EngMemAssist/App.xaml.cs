@@ -1,4 +1,4 @@
-﻿using EngMemAssist.Core.Services;
+using EngMemAssist.Core.Services;
 using EngMemAssist.Core.Settings;
 using EngMemAssist.Data;
 using EngMemAssist.Infrastructure;
@@ -81,6 +81,8 @@ public partial class App : Application
         services.AddIntegrations();
 
         services.AddSingleton<ISyncLog, FileSyncLog>();
+        services.AddSingleton<ILocalSourceService, LocalSourceService>();
+        services.AddSingleton<LocalSentenceSearcher>();
         services.AddSingleton<IWordSyncService, WordSyncService>();
         services.AddSingleton<IQuizService, QuizService>();
 

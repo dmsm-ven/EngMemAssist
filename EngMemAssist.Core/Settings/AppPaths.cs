@@ -24,5 +24,8 @@ public static class AppPaths
     /// <summary>Полный путь к файлу фона по имени из настроек.</summary>
     public static string BackgroundFile(string fileName) => Path.Combine(Root, fileName);
 
+    /// <summary>Копии подключённых .txt-баз предложений.</summary>
+    public static string SourcesDirectory => Path.Combine(Root, "sources");
+
     public static void EnsureCreated() => Directory.CreateDirectory(Root);
 }

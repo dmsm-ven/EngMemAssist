@@ -26,6 +26,7 @@ public sealed class WordSyncService : IWordSyncService
     private readonly ISentenceProvider _provider;
     private readonly ISettingsService _settings;
     private readonly ISyncLog _log;
+    private readonly LocalSentenceSearcher _local;
 
     public WordSyncService(
         IWordSource source,
@@ -34,8 +35,10 @@ public sealed class WordSyncService : IWordSyncService
         ISentenceRepository sentences,
         ISentenceProvider provider,
         ISettingsService settings,
-        ISyncLog log)
+        ISyncLog log,
+        LocalSentenceSearcher local)
     {
+        _local = local;
         _source = source;
         _lemmatizer = lemmatizer;
         _words = words;
@@ -68,6 +71,14 @@ public sealed class WordSyncService : IWordSyncService
         var rateLimited = false;
         string? rateLimitMessage = null;
 
+        // Сначала локальные базы: за один проход по файлам для всех слов сразу.
+        var localHits = new Dictionary<long, List<Sentence>>();
+        if (_local.HasSources && toFetch.Count > 0)
+        {
+            progress?.Report("Поиск предложений в локальных источниках…");
+            localHits = await _local.FindAsync(toFetch, progress, cancellationToken);
+        }
+
         var index = 0;
         foreach (var word in toFetch)
         {
@@ -77,14 +88,30 @@ public sealed class WordSyncService : IWordSyncService
 
             try
             {
-                var found = await FetchSentencesAsync(word, wanted, cancellationToken);
-                await _sentences.AddRangeAsync(found);
+                var added = 0;
+                if (localHits.TryGetValue(word.Id, out var local))
+                {
+                    added += await _sentences.AddRangeAsync(local);
+                }
+
+                var total = counts.GetValueOrDefault(word.Id) + added;
+                if (total >= wanted)
+                {
+                    _log.Write($"{word.English}: достаточно предложений из локальных источников ({total}), API не запрашивался.");
+                }
+                else
+                {
+                    var found = await FetchSentencesAsync(word, wanted, cancellationToken);
+                    var fromApi = await _sentences.AddRangeAsync(found);
+                    added += fromApi;
+                    total += fromApi;
+                }
 
                 word.SentencesFetchedAt = DateTime.UtcNow;
                 await _words.UpdateAsync(word);
 
-                sentencesAdded += found.Count;
-                counts[word.Id] = counts.GetValueOrDefault(word.Id) + found.Count;
+                sentencesAdded += added;
+                counts[word.Id] = total;
             }
             catch (TooManyRequestsException ex)
             {
@@ -114,6 +141,36 @@ public sealed class WordSyncService : IWordSyncService
             rateLimited,
             rateLimitMessage,
             withoutSentences);
+    }
+
+    public async Task<SupplementResult> SupplementFromLocalAsync(
+        IProgress<string>? progress = null, CancellationToken cancellationToken = default)
+    {
+        var sources = _settings.Current.LocalSources.Count;
+        if (!_local.HasSources)
+        {
+            return new SupplementResult(0, 0, 0, 0);
+        }
+
+        var words = (await _words.GetActiveAsync()).ToList();
+        progress?.Report($"Поиск предложений в локальных источниках ({sources} шт.)…");
+        var hits = await _local.FindAsync(words, progress, cancellationToken);
+
+        var updated = 0;
+        var added = 0;
+        foreach (var (wordId, sentences) in hits)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var count = await _sentences.AddRangeAsync(sentences);
+            if (count > 0)
+            {
+                updated++;
+                added += count;
+            }
+        }
+
+        _log.Write($"Дополнение из источников: слов проверено {words.Count}, пополнено {updated}, предложений добавлено {added}.");
+        return new SupplementResult(words.Count, updated, added, sources);
     }
 
     private static bool NeedsSentences(Word word, Dictionary<long, int> counts, int wanted, DateTime now)

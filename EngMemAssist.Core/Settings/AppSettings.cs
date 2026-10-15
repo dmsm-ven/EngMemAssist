@@ -22,6 +22,9 @@ public sealed class AppSettings
     /// <summary>Цвет подложки под изображением, #RRGGBB.</summary>
     public string BackgroundOverlayColor { get; set; } = "#000000";
 
+    /// <summary>Локальные текстовые базы предложений: ищутся раньше внешнего API.</summary>
+    public List<LocalSource> LocalSources { get; set; } = [];
+
     public int QuizQuestionCount { get; set; } = 10;
     public int QuizOptionsCount { get; set; } = 8;
     public int SentencesPerWord { get; set; } = 4;

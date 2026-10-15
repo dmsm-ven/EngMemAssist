@@ -13,18 +13,18 @@ public sealed class SentenceRepository : ISentenceRepository
         _factory = factory;
     }
 
-    public async Task AddRangeAsync(IReadOnlyList<Sentence> sentences)
+    public async Task<int> AddRangeAsync(IReadOnlyList<Sentence> sentences)
     {
         if (sentences.Count == 0)
         {
-            return;
+            return 0;
         }
 
         await using var connection = _factory.Create();
         await connection.OpenAsync();
         await using var transaction = await connection.BeginTransactionAsync();
 
-        await connection.ExecuteAsync(
+        var inserted = await connection.ExecuteAsync(
             """
             INSERT OR IGNORE INTO Sentences (WordId, Text, Translation, Source, MatchStart, MatchLength)
             VALUES (@WordId, @Text, @Translation, @Source, @MatchStart, @MatchLength)
@@ -33,6 +33,7 @@ public sealed class SentenceRepository : ISentenceRepository
             transaction);
 
         await transaction.CommitAsync();
+        return inserted;
     }
 
     public async Task<IReadOnlyDictionary<long, int>> CountByWordAsync()

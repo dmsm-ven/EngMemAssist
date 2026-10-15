@@ -23,6 +23,10 @@ public sealed partial class SyncCoordinator : ObservableObject
     [ObservableProperty]
     private bool _isBusy;
 
+    public bool IsNotBusy => !IsBusy;
+
+    partial void OnIsBusyChanged(bool value) => OnPropertyChanged(nameof(IsNotBusy));
+
     [ObservableProperty]
     private string _status = "Готово к работе";
 
@@ -124,6 +128,42 @@ public sealed partial class SyncCoordinator : ObservableObject
         {
             IsBusy = false;
             RefreshConfigured();
+            Completed?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    /// <summary>Дополняет предложения слов из локальных .txt-баз (без обращения к таблице и API).</summary>
+    public async Task SupplementAsync()
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            var progress = new Progress<string>(message => Status = message);
+            var result = await _sync.SupplementFromLocalAsync(progress);
+
+            Status = result.Sources == 0
+                ? "Нет локальных источников: добавьте .txt-файлы в настройках."
+                : $"Дополнение завершено: слов пополнено {result.WordsUpdated} из {result.WordsChecked}, предложений добавлено {result.SentencesAdded}.";
+
+            MessageBox.Show(Status, AppTitle, MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (OperationCanceledException)
+        {
+            Status = "Дополнение отменено";
+        }
+        catch (Exception ex)
+        {
+            Status = "Ошибка при дополнении из источников";
+            MessageBox.Show($"Ошибка при дополнении из источников:\n{ex.Message}", AppTitle, MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            IsBusy = false;
             Completed?.Invoke(this, EventArgs.Empty);
         }
     }

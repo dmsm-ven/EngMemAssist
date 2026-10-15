@@ -1,8 +1,10 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using EngMemAssist.Core.Services;
 using EngMemAssist.Core.Settings;
 using EngMemAssist.Infrastructure;
 using EngMemAssist.Navigation;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -12,6 +14,7 @@ namespace EngMemAssist.ViewModels;
 public sealed partial class SettingsViewModel : PageViewModelBase
 {
     private readonly ISettingsService _settings;
+    private readonly ILocalSourceService _localSources;
     private bool _loading = true;
 
     [ObservableProperty]
@@ -35,8 +38,15 @@ public sealed partial class SettingsViewModel : PageViewModelBase
     [ObservableProperty]
     private string _backgroundOverlayColor = "#000000";
 
-    public SettingsViewModel(ISettingsService settings, SyncCoordinator sync, AppBackgroundService background)
+    [ObservableProperty]
+    private string _localSourcesSummary = "";
+
+    public SettingsViewModel(
+        ISettingsService settings, SyncCoordinator sync, AppBackgroundService background, ILocalSourceService localSources)
     {
+        _localSources = localSources;
+        LocalSources = new ObservableCollection<LocalSource>(localSources.Sources);
+        LocalSourcesSummary = localSources.BuildSummary();
         _settings = settings;
         Sync = sync;
         Background = background;
@@ -58,6 +68,55 @@ public sealed partial class SettingsViewModel : PageViewModelBase
     public SyncCoordinator Sync { get; }
 
     public AppBackgroundService Background { get; }
+
+    public ObservableCollection<LocalSource> LocalSources { get; }
+
+    [RelayCommand]
+    private async Task AddSourceAsync()
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "Файл с предложениями (одна строка — одно предложение)",
+            Filter = "Текстовые файлы (*.txt)|*.txt",
+            Multiselect = true,
+        };
+
+        if (dialog.ShowDialog() != true)
+        {
+            return;
+        }
+
+        foreach (var path in dialog.FileNames)
+        {
+            try
+            {
+                LocalSources.Add(await _localSources.AddAsync(path));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Не удалось добавить файл {Path.GetFileName(path)}:\n{ex.Message}", "EngMemAssist",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        LocalSourcesSummary = _localSources.BuildSummary();
+    }
+
+    [RelayCommand]
+    private void RemoveSource(LocalSource? source)
+    {
+        if (source is null)
+        {
+            return;
+        }
+
+        _localSources.Remove(source.Id);
+        LocalSources.Remove(source);
+        LocalSourcesSummary = _localSources.BuildSummary();
+    }
+
+    [RelayCommand]
+    private Task SupplementFromSourcesAsync() => Sync.SupplementAsync();
 
     public ColorPreset[] OverlayColors => AppBackgroundService.Presets;
 

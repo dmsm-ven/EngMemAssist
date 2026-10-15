@@ -3,6 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
 
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </UserControl.Resources>
+
     <StackPanel MaxWidth="680" HorizontalAlignment="Left">
         <TextBlock Margin="0,0,0,16" FontSize="24" FontWeight="SemiBold" Text="Настройки" />
 
@@ -24,6 +28,44 @@
         <TextBlock Margin="0,0,0,4" Text="Тема" />
         <ComboBox Width="120" Margin="0,0,0,24" HorizontalAlignment="Left"
                   ItemsSource="{Binding ThemeOptions}" SelectedItem="{Binding Theme}" />
+
+        <ui:Card Padding="16" Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Margin="0,0,0,4" FontSize="16" FontWeight="SemiBold" Text="Локальные источники предложений" />
+                <TextBlock Margin="0,0,0,12" Opacity="0.7" TextWrapping="Wrap"
+                           Text="Файлы .txt: одна строка — одно предложение. Ищутся раньше внешнего API; если найдено 4 и больше предложений, API не запрашивается." />
+
+                <ItemsControl ItemsSource="{Binding LocalSources}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="90" />
+                                    <ColumnDefinition Width="110" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Grid.Column="1" VerticalAlignment="Center" Opacity="0.7" Text="{Binding SizeText}" />
+                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Opacity="0.7" Text="{Binding LinesText}" />
+                                <ui:Button Grid.Column="3" Icon="{ui:SymbolIcon Delete24}" ToolTip="Удалить источник"
+                                           Command="{Binding DataContext.RemoveSourceCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                           CommandParameter="{Binding}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <ui:Button Margin="0,8,0,8" Width="40" Command="{Binding AddSourceCommand}" Content="+" ToolTip="Добавить .txt-файл" />
+                <TextBlock Margin="0,0,0,12" Opacity="0.7" Text="{Binding LocalSourcesSummary}" />
+
+                <ui:Button Command="{Binding SupplementFromSourcesCommand}" Content="Дополнить из источников"
+                           IsEnabled="{Binding Sync.IsNotBusy}"
+                           ToolTip="Обойти все слова и добавить недостающие предложения из локальных файлов" />
+                <TextBlock Margin="0,8,0,0" Opacity="0.7" TextWrapping="Wrap" Text="{Binding Sync.Status}"
+                           Visibility="{Binding Sync.IsBusy, Converter={StaticResource BoolToVis}}" />
+            </StackPanel>
+        </ui:Card>
 
         <ui:Card Padding="16" Margin="0,0,0,16">
             <StackPanel>

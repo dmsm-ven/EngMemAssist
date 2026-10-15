@@ -18,7 +18,8 @@ public interface IWordRepository
 
 public interface ISentenceRepository
 {
-    Task AddRangeAsync(IReadOnlyList<Sentence> sentences);
+    /// <summary>Добавляет предложения; дубли (то же слово и тот же текст без учёта регистра) пропускаются. Возвращает число реально добавленных.</summary>
+    Task<int> AddRangeAsync(IReadOnlyList<Sentence> sentences);
 
     Task<IReadOnlyList<Sentence>> GetByWordIdsAsync(IReadOnlyCollection<long> wordIds);
 
