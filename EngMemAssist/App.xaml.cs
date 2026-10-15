@@ -88,6 +88,7 @@ public partial class App : Application
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<SyncCoordinator>();
 
+        services.AddSingleton<BackgroundService>();
         services.AddSingleton<MainWindow>();
         services.AddSingleton<MainViewModel>();
 

@@ -21,5 +21,8 @@ public static class AppPaths
     /// <summary>Папка с языковыми моделями Catalyst.</summary>
     public static string NlpModelsDirectory => Path.Combine(Root, "catalyst-models");
 
+    /// <summary>Полный путь к файлу фона по имени из настроек.</summary>
+    public static string BackgroundFile(string fileName) => Path.Combine(Root, fileName);
+
     public static void EnsureCreated() => Directory.CreateDirectory(Root);
 }

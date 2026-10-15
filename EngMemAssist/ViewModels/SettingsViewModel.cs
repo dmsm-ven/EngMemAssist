@@ -23,10 +23,19 @@ public sealed partial class SettingsViewModel : PageViewModelBase
     [ObservableProperty]
     private string _theme = "Dark";
 
-    public SettingsViewModel(ISettingsService settings, SyncCoordinator sync)
+    [ObservableProperty]
+    private double _backgroundOpacityPercent;
+
+    [ObservableProperty]
+    private string _backgroundOverlayColor = "#000000";
+
+    public SettingsViewModel(ISettingsService settings, SyncCoordinator sync, BackgroundService background)
     {
         _settings = settings;
         Sync = sync;
+        Background = background;
+        BackgroundOpacityPercent = Math.Round(settings.Current.BackgroundOpacity * 100);
+        BackgroundOverlayColor = settings.Current.BackgroundOverlayColor;
 
         SpreadsheetUrl = settings.Current.SpreadsheetUrl ?? "";
         QuestionCount = settings.Current.QuizQuestionCount;
@@ -39,6 +48,54 @@ public sealed partial class SettingsViewModel : PageViewModelBase
     public override NavSection Section => NavSection.Settings;
 
     public SyncCoordinator Sync { get; }
+
+    public BackgroundService Background { get; }
+
+    public ColorPreset[] OverlayColors => BackgroundService.Presets;
+
+    partial void OnBackgroundOpacityPercentChanged(double value)
+    {
+        if (!_loading)
+        {
+            Background.SetOpacity(value / 100.0);
+        }
+    }
+
+    partial void OnBackgroundOverlayColorChanged(string value)
+    {
+        if (!_loading && !string.IsNullOrEmpty(value))
+        {
+            Background.SetOverlayColor(value);
+        }
+    }
+
+    [RelayCommand]
+    private void ChooseBackground()
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "Фоновое изображение",
+            Filter = "Изображения (*.jpg;*.jpeg;*.png)|*.jpg;*.jpeg;*.png",
+        };
+
+        if (dialog.ShowDialog() != true)
+        {
+            return;
+        }
+
+        try
+        {
+            Background.SetImage(dialog.FileName);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Не удалось установить фон:\n{ex.Message}", "EngMemAssist",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
+    [RelayCommand]
+    private void ClearBackground() => Background.ClearImage();
 
     public int[] QuestionCountOptions { get; } = [5, 10, 15, 20, 30];
 

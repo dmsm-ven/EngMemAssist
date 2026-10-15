@@ -16,6 +16,7 @@
                  WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <infra:BoolToAppearanceConverter x:Key="ActiveAppearance" />
 
         <!-- ViewModel -> View: страницы подбираются автоматически -->
@@ -40,12 +41,23 @@
     </Window.Resources>
 
     <Grid>
+        <!-- Фон на всё окно: цветная подложка и картинка с заданной непрозрачностью -->
+        <Grid Grid.RowSpan="2" Panel.ZIndex="-1" IsHitTestVisible="False"
+              Visibility="{Binding Background.HasImage, Converter={StaticResource BoolToVis}}">
+            <Rectangle Fill="{Binding Background.OverlayBrush}" />
+            <Image Opacity="{Binding Background.ImageOpacity}" Source="{Binding Background.Image}" Stretch="UniformToFill" />
+        </Grid>
+
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <ui:TitleBar Grid.Row="0" Title="EngMemAssist" />
+        <ui:TitleBar Grid.Row="0" Title="EngMemAssist">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Width="16" Height="16" Source="pack://application:,,,/Assets/app.ico" />
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>

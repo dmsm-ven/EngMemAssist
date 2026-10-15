@@ -21,6 +21,18 @@
         <ComboBox Width="120" Margin="0,0,0,24" HorizontalAlignment="Left"
                   ItemsSource="{Binding ThemeOptions}" SelectedItem="{Binding Theme}" />
 
+        <TextBlock Margin="0,0,0,4" Text="Фоновое изображение" />
+        <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
+            <ui:Button Margin="0,0,8,0" Command="{Binding ChooseBackgroundCommand}" Content="Выбрать файл…" />
+            <ui:Button Command="{Binding ClearBackgroundCommand}" Content="Убрать фон" />
+        </StackPanel>
+        <TextBlock Margin="0,0,0,4" Opacity="0.7" Text="{Binding BackgroundOpacityPercent, StringFormat=Непрозрачность изображения: {0:0}%}" />
+        <Slider Width="300" Margin="0,0,0,8" HorizontalAlignment="Left" Minimum="0" Maximum="100" TickFrequency="5"
+                IsSnapToTickEnabled="True" Value="{Binding BackgroundOpacityPercent}" />
+        <TextBlock Margin="0,0,0,4" Opacity="0.7" Text="Цвет подложки" />
+        <ComboBox Width="200" Margin="0,0,0,24" HorizontalAlignment="Left" ItemsSource="{Binding OverlayColors}"
+                  DisplayMemberPath="Name" SelectedValuePath="Hex" SelectedValue="{Binding BackgroundOverlayColor}" />
+
         <TextBlock Margin="0,0,0,4" Text="Файлы приложения" />
         <TextBlock Margin="0,0,0,8" Opacity="0.7" TextWrapping="Wrap"
                    Text="{Binding ClientSecretPath, StringFormat=OAuth-ключ Google (client_secret.json): {0}}" />
