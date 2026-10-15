@@ -58,6 +58,7 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Width="*" Header="Дата" Binding="{Binding StartedAtLocal}" />
                         <DataGridTextColumn Width="Auto" Header="Результат" Binding="{Binding ScoreText}" />
+                        <DataGridTextColumn Width="Auto" Header="Подсказок" Binding="{Binding HintsUsed}" />
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>

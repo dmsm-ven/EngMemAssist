@@ -17,6 +17,9 @@ public sealed class SessionSummary
     public int QuestionCount { get; set; }
     public int CorrectCount { get; set; }
 
+    /// <summary>Сколько подсказок взято в этом тесте.</summary>
+    public int HintsUsed { get; set; }
+
     public string StartedAtLocal => DateTime.SpecifyKind(StartedAt, DateTimeKind.Utc).ToLocalTime().ToString("dd.MM.yyyy HH:mm");
     public string ScoreText => $"{CorrectCount} / {QuestionCount}";
 }

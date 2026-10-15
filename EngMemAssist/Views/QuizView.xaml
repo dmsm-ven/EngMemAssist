@@ -3,6 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
 
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+    </UserControl.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -21,12 +25,30 @@
         <Grid Grid.Row="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Margin="0,0,0,24" FontSize="24" TextWrapping="Wrap"><Run Text="{Binding Current.Before, Mode=OneWay}" /><Run FontWeight="Bold" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" Text="{Binding Current.Highlighted, Mode=OneWay}" /><Run Text="{Binding Current.After, Mode=OneWay}" /></TextBlock>
+            <TextBlock Grid.Row="0" Margin="0,0,0,16" FontSize="24" TextWrapping="Wrap"><Run Text="{Binding Current.Before, Mode=OneWay}" /><Run FontWeight="Bold" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" Text="{Binding Current.Highlighted, Mode=OneWay}" /><Run Text="{Binding Current.After, Mode=OneWay}" /></TextBlock>
 
-            <ItemsControl Grid.Row="1" ItemsSource="{Binding Current.Options}">
+            <StackPanel Grid.Row="1" Margin="0,0,0,16" Visibility="{Binding HasHints, Converter={StaticResource BoolToVisibility}}">
+                <StackPanel Orientation="Horizontal">
+                    <ui:Button Margin="0,0,8,0" Command="{Binding UseFiftyFiftyCommand}" Content="½  Убрать половину" />
+                    <ui:Button Margin="0,0,8,0" Command="{Binding UseExtraContextCommand}" Content="¶  Ещё предложение" />
+                    <ui:Button Margin="0,0,12,0" Command="{Binding UseFirstLetterCommand}" Content="Аб  Первая буква" />
+                    <TextBlock VerticalAlignment="Center" Opacity="0.7" Text="{Binding HintsText}" />
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Margin="0,0,0,16">
+                <TextBlock Margin="0,0,0,4" FontSize="18" Opacity="0.85" TextWrapping="Wrap"
+                           Visibility="{Binding HasExtraSentence, Converter={StaticResource BoolToVisibility}}"><Run Text="{Binding ExtraSentence.Before, Mode=OneWay}" /><Run FontWeight="Bold" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" Text="{Binding ExtraSentence.Highlighted, Mode=OneWay}" /><Run Text="{Binding ExtraSentence.After, Mode=OneWay}" /></TextBlock>
+                <TextBlock FontSize="16" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" Text="{Binding FirstLetterText}"
+                           Visibility="{Binding HasFirstLetter, Converter={StaticResource BoolToVisibility}}" />
+            </StackPanel>
+
+            <ItemsControl Grid.Row="3" ItemsSource="{Binding VisibleOptions}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <UniformGrid Columns="2" />

@@ -8,6 +8,6 @@ public interface IQuizService
     /// <exception cref="InvalidOperationException">Нет слов, пригодных для квиза.</exception>
     Task<IReadOnlyList<QuizQuestion>> CreateQuizAsync(int questionCount, int optionsCount);
 
-    /// <summary>Сохраняет сессию и ответы в БД и возвращает таблицу результатов. chosen[i] — ответ на вопрос i (null — нет ответа).</summary>
-    Task<QuizResult> FinishAsync(IReadOnlyList<QuizQuestion> questions, IReadOnlyList<string?> chosen, DateTime startedAt);
+    /// <summary>Сохраняет сессию и ответы в БД и возвращает таблицу результатов. chosen[i] — ответ на вопрос i (null — нет ответа), hints[i] — взятая подсказка.</summary>
+    Task<QuizResult> FinishAsync(IReadOnlyList<QuizQuestion> questions, IReadOnlyList<string?> chosen, IReadOnlyList<QuizHint> hints, DateTime startedAt);
 }

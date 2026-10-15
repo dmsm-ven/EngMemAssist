@@ -11,6 +11,9 @@ public sealed class QuizAnswer
 
     /// <summary>Верный вариант, который был показан среди вариантов (у старых записей null).</summary>
     public string? CorrectOption { get; set; }
+
+    /// <summary>Подсказка, взятая на этот вопрос.</summary>
+    public QuizHint Hint { get; set; }
     public bool IsCorrect { get; set; }
     public DateTime AnsweredAt { get; set; }
 }

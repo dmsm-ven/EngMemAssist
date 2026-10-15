@@ -41,7 +41,14 @@ public sealed class QuizService : IQuizService
 
         foreach (var word in chosenWords)
         {
-            var sentence = Pick(sentencesByWord[word.Id]);
+            var wordSentences = sentencesByWord[word.Id];
+            var sentence = Pick(wordSentences);
+            var extra = wordSentences
+                .Where(s => s.Id != sentence.Id)
+                .OrderBy(_ => Random.Shared.Next())
+                .Take(3)
+                .Select(s => new QuizSentence(s.Text, s.MatchStart, s.MatchLength))
+                .ToList();
             var translations = word.GetTranslations();
             var correct = Pick(translations);
 
@@ -57,14 +64,18 @@ public sealed class QuizService : IQuizService
                 sentence.MatchLength,
                 options,
                 correct,
-                word.Translation));
+                word.Translation,
+                extra));
         }
 
         return questions;
     }
 
     public async Task<QuizResult> FinishAsync(
-        IReadOnlyList<QuizQuestion> questions, IReadOnlyList<string?> chosen, DateTime startedAt)
+        IReadOnlyList<QuizQuestion> questions,
+        IReadOnlyList<string?> chosen,
+        IReadOnlyList<QuizHint> hints,
+        DateTime startedAt)
     {
         var finishedAt = DateTime.UtcNow;
         var answers = new List<QuizAnswer>();
@@ -75,6 +86,7 @@ public sealed class QuizService : IQuizService
             var question = questions[i];
             var choice = i < chosen.Count ? chosen[i] : null;
             var isCorrect = question.IsCorrect(choice);
+            var hint = i < hints.Count ? hints[i] : QuizHint.None;
 
             answers.Add(new QuizAnswer
             {
@@ -83,6 +95,7 @@ public sealed class QuizService : IQuizService
                 ChosenTranslation = choice ?? "",
                 CorrectTranslation = question.AllTranslations,
                 CorrectOption = question.CorrectOption,
+                Hint = hint,
                 IsCorrect = isCorrect,
                 AnsweredAt = finishedAt,
             });
@@ -93,7 +106,8 @@ public sealed class QuizService : IQuizService
                 choice ?? "—",
                 question.CorrectOption,
                 question.AllTranslations,
-                isCorrect));
+                isCorrect,
+                hint));
         }
 
         var session = new QuizSession

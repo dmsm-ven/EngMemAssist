@@ -14,6 +14,10 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+        <Style x:Key="HintIconStyle" TargetType="TextBlock" BasedOn="{StaticResource ResultTextStyle}">
+            <Setter Property="ToolTip" Value="{Binding HintDescription}" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
     </UserControl.Resources>
 
     <Grid>
@@ -34,6 +38,7 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Width="Auto" Header="№" Binding="{Binding Number}" ElementStyle="{StaticResource ResultTextStyle}" />
                 <DataGridTextColumn Width="Auto" Header="" Binding="{Binding ResultMark}" ElementStyle="{StaticResource ResultTextStyle}" />
+                <DataGridTextColumn Width="Auto" Header="Подсказка" Binding="{Binding HintIcon}" ElementStyle="{StaticResource HintIconStyle}" />
                 <DataGridTextColumn Width="*" Header="Слово" Binding="{Binding English}" ElementStyle="{StaticResource ResultTextStyle}" />
                 <DataGridTextColumn Width="*" Header="Ваш ответ" Binding="{Binding Chosen}" ElementStyle="{StaticResource ResultTextStyle}" />
                 <DataGridTextColumn Width="*" Header="Правильный вариант" Binding="{Binding CorrectOption}" ElementStyle="{StaticResource ResultTextStyle}" />

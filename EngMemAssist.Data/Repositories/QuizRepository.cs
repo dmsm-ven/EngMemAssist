@@ -35,8 +35,8 @@ public sealed class QuizRepository : IQuizRepository
 
         await connection.ExecuteAsync(
             """
-            INSERT INTO QuizAnswers (SessionId, WordId, SentenceId, ChosenTranslation, CorrectTranslation, CorrectOption, IsCorrect, AnsweredAt)
-            VALUES (@SessionId, @WordId, @SentenceId, @ChosenTranslation, @CorrectTranslation, @CorrectOption, @IsCorrect, @AnsweredAt)
+            INSERT INTO QuizAnswers (SessionId, WordId, SentenceId, ChosenTranslation, CorrectTranslation, CorrectOption, Hint, IsCorrect, AnsweredAt)
+            VALUES (@SessionId, @WordId, @SentenceId, @ChosenTranslation, @CorrectTranslation, @CorrectOption, @Hint, @IsCorrect, @AnsweredAt)
             """,
             answers,
             transaction);
@@ -84,7 +84,8 @@ public sealed class QuizRepository : IQuizRepository
         var rows = await connection.QueryAsync<SessionSummary>(
             """
             SELECT s.Id, s.StartedAt, s.QuestionCount,
-                   COALESCE(SUM(a.IsCorrect), 0) AS CorrectCount
+                   COALESCE(SUM(a.IsCorrect), 0) AS CorrectCount,
+                   COALESCE(SUM(CASE WHEN a.Hint > 0 THEN 1 ELSE 0 END), 0) AS HintsUsed
             FROM QuizSessions s
             LEFT JOIN QuizAnswers a ON a.SessionId = s.Id
             GROUP BY s.Id
@@ -104,7 +105,8 @@ public sealed class QuizRepository : IQuizRepository
                    a.ChosenTranslation                                AS Chosen,
                    COALESCE(a.CorrectOption, a.CorrectTranslation)    AS CorrectOption,
                    a.CorrectTranslation                               AS AllTranslations,
-                   a.IsCorrect                                        AS IsCorrect
+                   a.IsCorrect                                        AS IsCorrect,
+                   a.Hint                                             AS Hint
             FROM QuizAnswers a
             JOIN Words w ON w.Id = a.WordId
             WHERE a.SessionId = @sessionId
@@ -119,7 +121,8 @@ public sealed class QuizRepository : IQuizRepository
                 string.IsNullOrEmpty(r.Chosen) ? "—" : r.Chosen,
                 r.CorrectOption,
                 r.AllTranslations,
-                r.IsCorrect))
+                r.IsCorrect,
+                Enum.IsDefined(typeof(QuizHint), r.Hint) ? (QuizHint)r.Hint : QuizHint.None))
             .ToList();
 
         return new QuizResult(result);
@@ -132,6 +135,7 @@ public sealed class QuizRepository : IQuizRepository
         public string CorrectOption { get; set; } = "";
         public string AllTranslations { get; set; } = "";
         public bool IsCorrect { get; set; }
+        public int Hint { get; set; }
     }
 
     public async Task<IReadOnlyList<WordDifficulty>> GetHardestWordsAsync(int take)
