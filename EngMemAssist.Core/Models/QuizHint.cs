@@ -21,14 +21,14 @@ public static class QuizHintExtensions
     public static string Icon(this QuizHint hint) => hint switch
     {
         QuizHint.FiftyFifty => "½",
-        QuizHint.ExtraContext => "¶",
-        QuizHint.FirstLetter => "Аб",
+        QuizHint.ExtraContext => "💬",
+        QuizHint.FirstLetter => "🔤",
         _ => "",
     };
 
     public static string Description(this QuizHint hint) => hint switch
     {
-        QuizHint.FiftyFifty => "Подсказка: убрана половина неверных вариантов",
+        QuizHint.FiftyFifty => "Убрать половину неверных вариантов",
         QuizHint.ExtraContext => "Подсказка: показано дополнительное предложение",
         QuizHint.FirstLetter => "Подсказка: показана первая буква ответа",
         _ => "",

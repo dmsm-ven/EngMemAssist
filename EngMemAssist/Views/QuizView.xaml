@@ -34,10 +34,12 @@
 
             <StackPanel Grid.Row="1" Margin="0,0,0,16" Visibility="{Binding HasHints, Converter={StaticResource BoolToVisibility}}">
                 <StackPanel Orientation="Horizontal">
-                    <ui:Button Margin="0,0,8,0" Command="{Binding UseFiftyFiftyCommand}" Content="½  Убрать половину" />
-                    <ui:Button Margin="0,0,8,0" Command="{Binding UseExtraContextCommand}" Content="¶  Ещё предложение" />
-                    <ui:Button Margin="0,0,12,0" Command="{Binding UseFirstLetterCommand}" Content="Аб  Первая буква" />
-                    <TextBlock VerticalAlignment="Center" Opacity="0.7" Text="{Binding HintsText}" />
+                    <ui:Button Width="48" Height="48" Margin="0,0,8,0" Padding="0" FontSize="22"
+                               Command="{Binding UseFiftyFiftyCommand}" Content="½" ToolTip="Убрать половину неверных вариантов" />
+                    <ui:Button Width="48" Height="48" Margin="0,0,8,0" Padding="0" FontSize="22"
+                               Command="{Binding UseExtraContextCommand}" Content="💬" ToolTip="Показать ещё одно предложение со словом" />
+                    <ui:Button Width="48" Height="48" Margin="0,0,0,0" Padding="0" FontSize="22"
+                               Command="{Binding UseFirstLetterCommand}" Content="🔤" ToolTip="Показать первую букву ответа" />
                 </StackPanel>
             </StackPanel>
 
@@ -56,7 +58,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <ui:Button Margin="4" Padding="12,14" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                        <ui:Button Margin="16,2" Padding="12,14" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
                                    Command="{Binding DataContext.SelectOptionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                    CommandParameter="{Binding}"
                                    Content="{Binding}" />

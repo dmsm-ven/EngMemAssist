@@ -5,6 +5,7 @@
                  xmlns:vm="clr-namespace:EngMemAssist.ViewModels"
                  xmlns:views="clr-namespace:EngMemAssist.Views"
                  xmlns:infra="clr-namespace:EngMemAssist.Infrastructure"
+                 Icon="pack://application:,,,/Assets/app.ico"
                  Title="EngMemAssist"
                  Width="1000"
                  Height="640"

@@ -14,6 +14,9 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+        <Style x:Key="CorrectTextStyle" TargetType="TextBlock" BasedOn="{StaticResource ResultTextStyle}">
+            <Setter Property="ToolTip" Value="{Binding AllTranslations, StringFormat='Все верные варианты: {0}'}" />
+        </Style>
         <Style x:Key="HintIconStyle" TargetType="TextBlock" BasedOn="{StaticResource ResultTextStyle}">
             <Setter Property="ToolTip" Value="{Binding HintDescription}" />
             <Setter Property="HorizontalAlignment" Value="Center" />
@@ -41,8 +44,7 @@
                 <DataGridTextColumn Width="Auto" Header="Подсказка" Binding="{Binding HintIcon}" ElementStyle="{StaticResource HintIconStyle}" />
                 <DataGridTextColumn Width="*" Header="Слово" Binding="{Binding English}" ElementStyle="{StaticResource ResultTextStyle}" />
                 <DataGridTextColumn Width="*" Header="Ваш ответ" Binding="{Binding Chosen}" ElementStyle="{StaticResource ResultTextStyle}" />
-                <DataGridTextColumn Width="*" Header="Правильный вариант" Binding="{Binding CorrectOption}" ElementStyle="{StaticResource ResultTextStyle}" />
-                <DataGridTextColumn Width="2*" Header="Все переводы" Binding="{Binding AllTranslations}" ElementStyle="{StaticResource ResultTextStyle}" />
+                <DataGridTextColumn Width="*" Header="Правильный вариант" Binding="{Binding CorrectOption}" ElementStyle="{StaticResource CorrectTextStyle}" />
             </DataGrid.Columns>
         </DataGrid>
 
