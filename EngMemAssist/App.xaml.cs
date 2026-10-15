@@ -1,4 +1,4 @@
-using EngMemAssist.Core.Services;
+﻿using EngMemAssist.Core.Services;
 using EngMemAssist.Core.Settings;
 using EngMemAssist.Data;
 using EngMemAssist.Infrastructure;

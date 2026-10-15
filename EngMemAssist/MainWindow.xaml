@@ -1,25 +1,26 @@
-<ui:FluentWindow x:Class="EngMemAssist.MainWindow"
-                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-                 xmlns:vm="clr-namespace:EngMemAssist.ViewModels"
-                 xmlns:views="clr-namespace:EngMemAssist.Views"
-                 xmlns:infra="clr-namespace:EngMemAssist.Infrastructure"
-                 Icon="pack://application:,,,/Assets/app.ico"
-                 Title="EngMemAssist"
-                 Width="1000"
-                 Height="640"
-                 MinWidth="800"
-                 MinHeight="520"
-                 ExtendsContentIntoTitleBar="True"
-                 WindowBackdropType="Mica"
-                 WindowStartupLocation="CenterScreen">
+﻿<ui:FluentWindow
+    x:Class="EngMemAssist.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:infra="clr-namespace:EngMemAssist.Infrastructure"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:views="clr-namespace:EngMemAssist.Views"
+    xmlns:vm="clr-namespace:EngMemAssist.ViewModels"
+    Title="EngMemAssist"
+    Width="1000"
+    Height="640"
+    MinWidth="800"
+    MinHeight="520"
+    ExtendsContentIntoTitleBar="True"
+    Icon="pack://application:,,,/Assets/app.ico"
+    WindowBackdropType="Mica"
+    WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <infra:BoolToAppearanceConverter x:Key="ActiveAppearance" />
 
-        <!-- ViewModel -> View: страницы подбираются автоматически -->
+        <!--  ViewModel -> View: страницы подбираются автоматически  -->
         <DataTemplate DataType="{x:Type vm:HomeViewModel}">
             <views:HomeView />
         </DataTemplate>
@@ -46,16 +47,22 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Фон на всё окно: цветная подложка и картинка с заданной непрозрачностью -->
-        <Grid Grid.RowSpan="2" Panel.ZIndex="-1" IsHitTestVisible="False"
-              Visibility="{Binding Background.HasImage, Converter={StaticResource BoolToVis}}">
+        <!--  Фон на всё окно: цветная подложка и картинка с заданной непрозрачностью  -->
+        <Grid
+            Grid.RowSpan="2"
+            Panel.ZIndex="-1"
+            IsHitTestVisible="False"
+            Visibility="{Binding Background.HasImage, Converter={StaticResource BoolToVis}}">
             <Rectangle Fill="{Binding Background.OverlayBrush}" />
-            <Rectangle Opacity="{Binding Background.ImageOpacity}" Fill="{Binding Background.ImageBrush}" />
+            <Rectangle Fill="{Binding Background.ImageBrush}" Opacity="{Binding Background.ImageOpacity}" />
         </Grid>
 
-        <ui:TitleBar Grid.Row="0" Title="EngMemAssist">
+        <ui:TitleBar Title="EngMemAssist" Grid.Row="0">
             <ui:TitleBar.Icon>
-                <ui:ImageIcon Width="16" Height="16" Source="pack://application:,,,/Assets/app.ico" />
+                <ui:ImageIcon
+                    Width="16"
+                    Height="16"
+                    Source="pack://application:,,,/Assets/app.ico" />
             </ui:TitleBar.Icon>
         </ui:TitleBar>
 
@@ -66,17 +73,35 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0" Margin="12">
-                <ui:Button Margin="0,0,0,8" HorizontalAlignment="Stretch" Command="{Binding ShowHomeCommand}" Content="Главная"
-                           Appearance="{Binding IsHomeActive, Converter={StaticResource ActiveAppearance}}" />
-                <ui:Button Margin="0,0,0,8" HorizontalAlignment="Stretch" Command="{Binding ShowWordsCommand}" Content="Список слов"
-                           Appearance="{Binding IsWordsActive, Converter={StaticResource ActiveAppearance}}" />
-                <ui:Button Margin="0,0,0,8" HorizontalAlignment="Stretch" Command="{Binding ShowStatsCommand}" Content="Статистика"
-                           Appearance="{Binding IsStatsActive, Converter={StaticResource ActiveAppearance}}" />
-                <ui:Button HorizontalAlignment="Stretch" Command="{Binding ShowSettingsCommand}" Content="Настройки"
-                           Appearance="{Binding IsSettingsActive, Converter={StaticResource ActiveAppearance}}" />
+                <ui:Button
+                    Margin="0,0,0,8"
+                    HorizontalAlignment="Stretch"
+                    Appearance="{Binding IsHomeActive, Converter={StaticResource ActiveAppearance}}"
+                    Command="{Binding ShowHomeCommand}"
+                    Content="Главная" />
+                <ui:Button
+                    Margin="0,0,0,8"
+                    HorizontalAlignment="Stretch"
+                    Appearance="{Binding IsWordsActive, Converter={StaticResource ActiveAppearance}}"
+                    Command="{Binding ShowWordsCommand}"
+                    Content="Список слов" />
+                <ui:Button
+                    Margin="0,0,0,8"
+                    HorizontalAlignment="Stretch"
+                    Appearance="{Binding IsStatsActive, Converter={StaticResource ActiveAppearance}}"
+                    Command="{Binding ShowStatsCommand}"
+                    Content="Статистика" />
+                <ui:Button
+                    HorizontalAlignment="Stretch"
+                    Appearance="{Binding IsSettingsActive, Converter={StaticResource ActiveAppearance}}"
+                    Command="{Binding ShowSettingsCommand}"
+                    Content="Настройки" />
             </StackPanel>
 
-            <ContentControl Grid.Column="1" Margin="16" Content="{Binding Navigation.Current}" />
+            <ContentControl
+                Grid.Column="1"
+                Margin="16"
+                Content="{Binding Navigation.Current}" />
         </Grid>
     </Grid>
 </ui:FluentWindow>

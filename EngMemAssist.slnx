@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
   <Project Path="EngMemAssist.Core/EngMemAssist.Core.csproj" />
   <Project Path="EngMemAssist.Data/EngMemAssist.Data.csproj" />
   <Project Path="EngMemAssist.Integrations/EngMemAssist.Integrations.csproj" />

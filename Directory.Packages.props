@@ -6,9 +6,9 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
-    <PackageVersion Include="WPF-UI" Version="4.0.3" />
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.13" />
+    <PackageVersion Include="WPF-UI" Version="4.3.0" />
     <PackageVersion Include="Dapper" Version="2.1.66" />
     <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.0" />
     <PackageVersion Include="dbup-sqlite" Version="6.0.4" />
