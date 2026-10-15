@@ -28,7 +28,7 @@ public static class QuizHintExtensions
 
     public static string Description(this QuizHint hint) => hint switch
     {
-        QuizHint.FiftyFifty => "Убрать половину неверных вариантов",
+        QuizHint.FiftyFifty => "Подсказка: убрана половина неверных вариантов",
         QuizHint.ExtraContext => "Подсказка: показано дополнительное предложение",
         QuizHint.FirstLetter => "Подсказка: показана первая буква ответа",
         _ => "",
