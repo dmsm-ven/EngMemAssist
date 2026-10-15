@@ -24,6 +24,25 @@
             </StackPanel>
         </ui:Card>
 
+        <ui:Card Margin="0,0,0,16" Padding="16">
+            <StackPanel>
+                <TextBlock Margin="0,0,0,8" FontSize="16" FontWeight="SemiBold" Text="Режим квиза" />
+                <ItemsControl ItemsSource="{Binding Strategies}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <RadioButton Margin="0,0,0,4" GroupName="QuizStrategy" IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                         ToolTip="{Binding Description}">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Title}" />
+                                    <TextBlock FontSize="12" Opacity="0.6" TextWrapping="Wrap" Text="{Binding Description}" />
+                                </StackPanel>
+                            </RadioButton>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ui:Card>
+
         <StackPanel Orientation="Horizontal">
             <ui:Button Margin="0,0,8,0" Padding="24,10" Appearance="Primary" Command="{Binding StartQuizCommand}" Content="Начать квиз" />
             <ui:Button Margin="0,0,8,0" Padding="16,10" Command="{Binding SyncCommand}" Content="Синхронизировать" />

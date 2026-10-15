@@ -2,6 +2,8 @@ using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EngMemAssist.Core.Abstractions;
+using EngMemAssist.Core.Models;
+using EngMemAssist.Core.Settings;
 using EngMemAssist.Infrastructure;
 using EngMemAssist.Navigation;
 
@@ -11,6 +13,7 @@ public sealed partial class HomeViewModel : PageViewModelBase
 {
     private readonly INavigationService _navigation;
     private readonly IWordRepository _words;
+    private readonly ISettingsService _settings;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(StartQuizCommand))]
@@ -20,8 +23,16 @@ public sealed partial class HomeViewModel : PageViewModelBase
     private string _summary = "";
 
     public HomeViewModel(
-        INavigationService navigation, SyncCoordinator sync, IWordRepository words, RecentSessionsViewModel recentSessions)
+        INavigationService navigation,
+        SyncCoordinator sync,
+        IWordRepository words,
+        RecentSessionsViewModel recentSessions,
+        ISettingsService settings)
     {
+        _settings = settings;
+        Strategies = QuizStrategyExtensions.All
+            .Select(s => new StrategyOption(s, s == settings.Current.QuizStrategy, OnStrategySelected))
+            .ToList();
         RecentSessions = recentSessions;
         _navigation = navigation;
         _words = words;
@@ -33,6 +44,14 @@ public sealed partial class HomeViewModel : PageViewModelBase
     public SyncCoordinator Sync { get; }
 
     public RecentSessionsViewModel RecentSessions { get; }
+
+    public IReadOnlyList<StrategyOption> Strategies { get; }
+
+    private void OnStrategySelected(StrategyOption option)
+    {
+        _settings.Current.QuizStrategy = option.Strategy;
+        _settings.Save();
+    }
 
     public override async Task OnNavigatedToAsync()
     {

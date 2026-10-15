@@ -28,6 +28,9 @@ public sealed class AppSettings
     /// <summary>Локальные текстовые базы предложений: ищутся раньше внешнего API.</summary>
     public List<LocalSource> LocalSources { get; set; } = [];
 
+    /// <summary>Стратегия выбора слов для квиза (выбирается на главной).</summary>
+    public Models.QuizStrategy QuizStrategy { get; set; } = Models.QuizStrategy.Normal;
+
     public int QuizQuestionCount { get; set; } = 10;
     public int QuizOptionsCount { get; set; } = 8;
     public int SentencesPerWord { get; set; } = 4;

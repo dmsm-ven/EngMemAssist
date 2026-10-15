@@ -69,7 +69,8 @@ public sealed partial class QuizViewModel : PageViewModelBase
         {
             var questions = await _quiz.CreateQuizAsync(
                 _settings.Current.QuizQuestionCount,
-                _settings.Current.QuizOptionsCount);
+                _settings.Current.QuizOptionsCount,
+                _settings.Current.QuizStrategy);
             _questions = questions.ToList();
         }
         catch (InvalidOperationException ex)

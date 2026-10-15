@@ -16,7 +16,8 @@ public sealed class QuizService : IQuizService
         _quizzes = quizzes;
     }
 
-    public async Task<IReadOnlyList<QuizQuestion>> CreateQuizAsync(int questionCount, int optionsCount)
+    public async Task<IReadOnlyList<QuizQuestion>> CreateQuizAsync(
+        int questionCount, int optionsCount, QuizStrategy strategy = QuizStrategy.Normal)
     {
         var words = await _words.GetActiveAsync();
         var sentences = await _sentences.GetByWordIdsAsync(words.Select(w => w.Id).ToList());
@@ -36,7 +37,7 @@ public sealed class QuizService : IQuizService
                 "Нет слов для квиза: у слов пока нет проверочных предложений. Дождитесь окончания синхронизации.");
         }
 
-        var chosenWords = PickWeighted(candidates, Math.Min(questionCount, candidates.Count));
+        var chosenWords = PickWords(candidates, Math.Min(questionCount, candidates.Count), strategy);
         var questions = new List<QuizQuestion>();
 
         foreach (var word in chosenWords)
@@ -121,6 +122,55 @@ public sealed class QuizService : IQuizService
         await _quizzes.SaveSessionAsync(session, answers);
         return new QuizResult(rows);
     }
+
+    private static readonly QuizStrategy[] RandomPool =
+        [QuizStrategy.Normal, QuizStrategy.Hardest, QuizStrategy.LeastPlayed, QuizStrategy.Forgotten];
+
+    /// <summary>Выбирает слова по стратегии; если подходящих слов не хватает, остаток добирается обычным взвешенным выбором.</summary>
+    private static List<Word> PickWords(List<Word> candidates, int count, QuizStrategy strategy)
+    {
+        if (strategy == QuizStrategy.Random)
+        {
+            strategy = RandomPool[Random.Shared.Next(RandomPool.Length)];
+        }
+
+        List<Word> primary = strategy switch
+        {
+            QuizStrategy.Hardest => TakeFromTop(
+                candidates.Where(w => w.WrongCount > 0)
+                    .OrderByDescending(w => (double)w.WrongCount / (w.CorrectCount + w.WrongCount))
+                    .ThenByDescending(w => w.WrongCount),
+                count),
+            QuizStrategy.LeastPlayed => TakeFromTop(
+                candidates.OrderBy(w => w.CorrectCount + w.WrongCount).ThenBy(_ => Random.Shared.Next()),
+                count,
+                poolFactor: 1),
+            QuizStrategy.Forgotten => TakeFromTop(
+                candidates.Where(w => w.LastAskedAt is not null).OrderBy(w => w.LastAskedAt),
+                count),
+            _ => [],
+        };
+
+        if (strategy == QuizStrategy.Normal || primary.Count == 0)
+        {
+            return PickWeighted(candidates, count);
+        }
+
+        if (primary.Count < count)
+        {
+            var taken = primary.Select(w => w.Id).ToHashSet();
+            primary.AddRange(PickWeighted(candidates.Where(w => !taken.Contains(w.Id)).ToList(), count - primary.Count));
+        }
+
+        return primary.OrderBy(_ => Random.Shared.Next()).ToList();
+    }
+
+    /// <summary>
+    /// Берёт слова из начала упорядоченного списка. Пул чуть больше нужного (в 2 раза),
+    /// чтобы два квиза подряд не состояли из одних и тех же слов.
+    /// </summary>
+    private static List<Word> TakeFromTop(IEnumerable<Word> ordered, int count, int poolFactor = 2) =>
+        ordered.Take(count * poolFactor).OrderBy(_ => Random.Shared.Next()).Take(count).ToList();
 
     /// <summary>
     /// Вес слова: базовая единица, плюс доля ошибок, плюс бонус за непроверенные слова,
