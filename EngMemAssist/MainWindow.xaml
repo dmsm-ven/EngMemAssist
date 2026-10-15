@@ -41,17 +41,17 @@
     </Window.Resources>
 
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
         <!-- Фон на всё окно: цветная подложка и картинка с заданной непрозрачностью -->
         <Grid Grid.RowSpan="2" Panel.ZIndex="-1" IsHitTestVisible="False"
               Visibility="{Binding Background.HasImage, Converter={StaticResource BoolToVis}}">
             <Rectangle Fill="{Binding Background.OverlayBrush}" />
             <Image Opacity="{Binding Background.ImageOpacity}" Source="{Binding Background.Image}" Stretch="UniformToFill" />
         </Grid>
-
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
 
         <ui:TitleBar Grid.Row="0" Title="EngMemAssist">
             <ui:TitleBar.Icon>
