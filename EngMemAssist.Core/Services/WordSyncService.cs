@@ -53,10 +53,11 @@ public sealed class WordSyncService : IWordSyncService
         progress?.Report("Загрузка списка слов из таблицы (при первом запуске откроется браузер для входа в Google)…");
         var rows = await _source.LoadAsync(cancellationToken);
 
-        progress?.Report("Обработка слов (первый запуск может занять время: загружаются языковые модели)…");
-        var parsed = await Task.Run(() => Normalize(rows), cancellationToken);
-
         var existing = await _words.GetAllAsync();
+
+        progress?.Report("Обработка слов…");
+        var parsed = await Task.Run(() => Normalize(rows, existing), cancellationToken);
+
         var diff = await ApplyDiffAsync(parsed, existing);
 
         var wanted = Math.Max(1, _settings.Current.SentencesPerWord);
@@ -188,8 +189,19 @@ public sealed class WordSyncService : IWordSyncService
     private sealed record DiffResult(int Added, int Updated, int Removed, List<Word> Active);
 
     /// <summary>Приводит строки таблицы к нормальной форме. Пустые строки и дубли по лемме отбрасываются.</summary>
-    private List<ParsedWord> Normalize(IReadOnlyList<SourceWord> rows)
+    private List<ParsedWord> Normalize(IReadOnlyList<SourceWord> rows, IReadOnlyList<Word> existing)
     {
+        // Для слов, которые уже есть в базе, лемма известна: лемматизатор (тяжёлые языковые модели)
+        // загружается только когда в таблице появились новые слова.
+        var knownLemmas = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var word in existing)
+        {
+            if (!string.IsNullOrWhiteSpace(word.Lemma))
+            {
+                knownLemmas.TryAdd(word.English, word.Lemma);
+            }
+        }
+
         var result = new List<ParsedWord>();
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -202,13 +214,22 @@ public sealed class WordSyncService : IWordSyncService
                 continue;
             }
 
-            var pattern = WordPattern.Create(_lemmatizer, english);
-            if (pattern.IsEmpty)
+            string lemma;
+            if (knownLemmas.TryGetValue(english, out var known))
             {
-                continue;
+                lemma = known;
+            }
+            else
+            {
+                var pattern = WordPattern.Create(_lemmatizer, english);
+                if (pattern.IsEmpty)
+                {
+                    continue;
+                }
+
+                lemma = pattern.Lemma;
             }
 
-            var lemma = pattern.Lemma;
             if (seen.Add(lemma))
             {
                 result.Add(new ParsedWord(english, translation, lemma));

@@ -90,8 +90,7 @@ public sealed partial class HomeViewModel : PageViewModelBase
 
     private async Task RefreshAsync()
     {
-        var words = await _words.GetActiveAsync();
-        WordCount = words.Count;
+        WordCount = await _words.CountActiveAsync();
         await RecentSessions.LoadAsync();
         Summary = WordCount == 0 ? "В словаре пока нет слов." : $"Слов в словаре: {WordCount}";
     }

@@ -13,6 +13,9 @@ public sealed partial class WordsViewModel : PageViewModelBase
     private IReadOnlyList<Word> _all = [];
 
     [ObservableProperty]
+    private bool _isLoading;
+
+    [ObservableProperty]
     private string _searchText = "";
 
     [ObservableProperty]
@@ -36,15 +39,23 @@ public sealed partial class WordsViewModel : PageViewModelBase
 
     public override async Task OnNavigatedToAsync()
     {
-        _all = await _words.GetActiveAsync();
-
-        var counts = await _sentences.CountByWordAsync();
-        foreach (var word in _all)
+        IsLoading = true;
+        try
         {
-            word.SentenceCount = counts.GetValueOrDefault(word.Id);
-        }
+            _all = await _words.GetActiveAsync();
 
-        ApplyFilter();
+            var counts = await _sentences.CountByWordAsync();
+            foreach (var word in _all)
+            {
+                word.SentenceCount = counts.GetValueOrDefault(word.Id);
+            }
+
+            ApplyFilter();
+        }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
     partial void OnSearchTextChanged(string value) => ApplyFilter();

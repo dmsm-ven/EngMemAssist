@@ -10,6 +10,9 @@ public interface IWordRepository
     /// <summary>Слова, которые есть в таблице сейчас.</summary>
     Task<IReadOnlyList<Word>> GetActiveAsync();
 
+    /// <summary>Сколько слов в словаре сейчас (без загрузки самих слов).</summary>
+    Task<int> CountActiveAsync();
+
     Task InsertAsync(Word word);
 
     /// <summary>Обновляет лемму, английское слово, перевод, флаг удаления и дату загрузки предложений. Счётчики квиза не трогает.</summary>

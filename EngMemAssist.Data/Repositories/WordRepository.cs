@@ -31,6 +31,12 @@ public sealed class WordRepository : IWordRepository
         return rows.AsList();
     }
 
+    public async Task<int> CountActiveAsync()
+    {
+        await using var connection = _factory.Create();
+        return await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM Words WHERE IsRemoved = 0");
+    }
+
     public async Task InsertAsync(Word word)
     {
         await using var connection = _factory.Create();

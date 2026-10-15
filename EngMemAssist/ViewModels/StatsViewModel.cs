@@ -10,6 +10,9 @@ public sealed partial class StatsViewModel : PageViewModelBase
     private readonly IQuizRepository _quizzes;
 
     [ObservableProperty]
+    private bool _isLoading;
+
+    [ObservableProperty]
     private StatsOverview _overview = new();
 
     [ObservableProperty]
@@ -32,9 +35,17 @@ public sealed partial class StatsViewModel : PageViewModelBase
 
     public override async Task OnNavigatedToAsync()
     {
-        Overview = await _quizzes.GetOverviewAsync();
-        await RecentSessions.LoadAsync();
-        WordStats = await _quizzes.GetWordStatsAsync();
-        HardestWords = await _quizzes.GetHardestWordsAsync(15);
+        IsLoading = true;
+        try
+        {
+            Overview = await _quizzes.GetOverviewAsync();
+            await RecentSessions.LoadAsync();
+            WordStats = await _quizzes.GetWordStatsAsync();
+            HardestWords = await _quizzes.GetHardestWordsAsync(15);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 }

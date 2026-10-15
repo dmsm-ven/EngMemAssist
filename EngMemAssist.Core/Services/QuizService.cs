@@ -20,15 +20,13 @@ public sealed class QuizService : IQuizService
         int questionCount, int optionsCount, QuizStrategy strategy = QuizStrategy.Normal)
     {
         var words = await _words.GetActiveAsync();
-        var sentences = await _sentences.GetByWordIdsAsync(words.Select(w => w.Id).ToList());
 
-        var sentencesByWord = sentences
-            .Where(s => s.HasValidMatch)
-            .GroupBy(s => s.WordId)
-            .ToDictionary(g => g.Key, g => g.ToList());
+        // Предложения целиком в память не грузим (с локальными базами их могут быть тысячи на слово):
+        // сначала смотрим только, у каких слов они есть, а сами тексты читаем для выбранных слов.
+        var counts = await _sentences.CountByWordAsync();
 
         var candidates = words
-            .Where(w => w.GetTranslations().Count > 0 && sentencesByWord.ContainsKey(w.Id))
+            .Where(w => w.GetTranslations().Count > 0 && counts.ContainsKey(w.Id))
             .ToList();
 
         if (candidates.Count == 0)
@@ -38,6 +36,20 @@ public sealed class QuizService : IQuizService
         }
 
         var chosenWords = PickWords(candidates, Math.Min(questionCount, candidates.Count), strategy);
+
+        var sentences = await _sentences.GetByWordIdsAsync(chosenWords.Select(w => w.Id).ToList());
+        var sentencesByWord = sentences
+            .Where(s => s.HasValidMatch)
+            .GroupBy(s => s.WordId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+        chosenWords = chosenWords.Where(w => sentencesByWord.ContainsKey(w.Id)).ToList();
+
+        if (chosenWords.Count == 0)
+        {
+            throw new InvalidOperationException(
+                "Нет слов для квиза: у слов пока нет проверочных предложений. Дождитесь окончания синхронизации.");
+        }
+
         var questions = new List<QuizQuestion>();
 
         foreach (var word in chosenWords)
