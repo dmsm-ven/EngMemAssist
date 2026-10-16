@@ -1,3 +1,4 @@
+using EngMemAssist.Core.Models;
 using System.Globalization;
 
 namespace EngMemAssist.ViewModels;
@@ -38,7 +39,7 @@ public sealed record HeatmapDay(DateOnly Date, int Count, bool IsFuture)
 public sealed record HeatmapWeek(IReadOnlyList<HeatmapDay> Days);
 
 /// <summary>Сколько слов находится на стадии изучения (для полосы прогресса).</summary>
-public sealed record StageSummary(Core.Models.WordStage Stage, int Count)
+public sealed record StageSummary(WordStage Stage, int Count)
 {
     public string Title => $"{Stage.Icon()} {Stage.Title()}";
 
