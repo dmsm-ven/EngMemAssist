@@ -30,6 +30,12 @@ public sealed partial class SettingsViewModel : PageViewModelBase
     private double _backgroundOpacityPercent;
 
     [ObservableProperty]
+    private bool _soundEnabled;
+
+    [ObservableProperty]
+    private bool _shakeOnWrong;
+
+    [ObservableProperty]
     private bool _backgroundTile;
 
     [ObservableProperty]
@@ -53,6 +59,8 @@ public sealed partial class SettingsViewModel : PageViewModelBase
         BackgroundOpacityPercent = Math.Round(settings.Current.BackgroundOpacity * 100);
         BackgroundOverlayColor = settings.Current.BackgroundOverlayColor;
         BackgroundTile = settings.Current.BackgroundTile;
+        SoundEnabled = settings.Current.SoundEnabled;
+        ShakeOnWrong = settings.Current.ShakeOnWrong;
         BackgroundTileScalePercent = Math.Round(settings.Current.BackgroundTileScale * 100);
 
         SpreadsheetUrl = settings.Current.SpreadsheetUrl ?? "";
@@ -133,6 +141,24 @@ public sealed partial class SettingsViewModel : PageViewModelBase
         if (!_loading)
         {
             Background.SetTileScale(value / 100.0);
+        }
+    }
+
+    partial void OnSoundEnabledChanged(bool value)
+    {
+        if (!_loading)
+        {
+            _settings.Current.SoundEnabled = value;
+            _settings.Save();
+        }
+    }
+
+    partial void OnShakeOnWrongChanged(bool value)
+    {
+        if (!_loading)
+        {
+            _settings.Current.ShakeOnWrong = value;
+            _settings.Save();
         }
     }
 

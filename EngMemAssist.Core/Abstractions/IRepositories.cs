@@ -41,6 +41,15 @@ public interface IQuizRepository
 
     Task<IReadOnlyList<WordDifficulty>> GetHardestWordsAsync(int take);
 
+    /// <summary>
+    /// Прогресс слов по истории ответов: число ответов и верных подряд в конце. Слов без ответов в словаре нет.
+    /// wordIds = null — по всем словам.
+    /// </summary>
+    Task<IReadOnlyDictionary<long, WordProgress>> GetWordProgressAsync(IReadOnlyCollection<long>? wordIds = null);
+
+    /// <summary>Сколько ответов дано в каждый из последних дней (по местному времени). Дни без ответов в словаре не представлены.</summary>
+    Task<IReadOnlyDictionary<DateOnly, int>> GetDailyActivityAsync(int days);
+
     /// <summary>Статистика ответов по каждому слову словаря (в том числе по ещё не проверявшимся).</summary>
     Task<IReadOnlyList<WordDifficulty>> GetWordStatsAsync();
 

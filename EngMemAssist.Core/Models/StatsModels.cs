@@ -26,10 +26,19 @@ public sealed class SessionSummary
 
 public sealed class WordDifficulty
 {
+    public long WordId { get; set; }
+
     public string English { get; set; } = "";
     public string Translation { get; set; } = "";
     public int CorrectCount { get; set; }
     public int WrongCount { get; set; }
+
+    /// <summary>Верных ответов подряд в конце истории слова.</summary>
+    public int Streak { get; set; }
+
+    public WordStage Stage { get; set; }
+
+    public string StageText => $"{Stage.Icon()} {Stage.Title()}";
 
     public string ErrorPercentText =>
         CorrectCount + WrongCount == 0 ? "—" : $"{100.0 * WrongCount / (CorrectCount + WrongCount):0}%";

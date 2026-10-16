@@ -92,6 +92,8 @@ public sealed class QuizService : IQuizService
         DateTime startedAt)
     {
         var finishedAt = DateTime.UtcNow;
+        var wordIds = questions.Select(q => q.WordId).Distinct().ToList();
+        var before = await _quizzes.GetWordProgressAsync(wordIds);
         var answers = new List<QuizAnswer>();
         var rows = new List<QuizResultRow>();
 
@@ -132,7 +134,21 @@ public sealed class QuizService : IQuizService
         };
 
         await _quizzes.SaveSessionAsync(session, answers);
-        return new QuizResult(rows);
+
+        // Какие слова сменили стадию изучения из-за этого теста.
+        var after = await _quizzes.GetWordProgressAsync(wordIds);
+        var changes = new List<WordStageChange>();
+        foreach (var question in questions.DistinctBy(q => q.WordId))
+        {
+            var from = before.GetValueOrDefault(question.WordId, WordProgress.Empty).Stage;
+            var to = after.GetValueOrDefault(question.WordId, WordProgress.Empty).Stage;
+            if (from != to)
+            {
+                changes.Add(new WordStageChange(question.English, from, to));
+            }
+        }
+
+        return new QuizResult(rows, changes);
     }
 
     private static readonly QuizStrategy[] RandomPool =

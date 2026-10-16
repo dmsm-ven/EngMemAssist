@@ -17,8 +17,17 @@ public sealed record QuizResultRow(
     public string HintDescription => Hint.Description();
 }
 
-public sealed record QuizResult(IReadOnlyList<QuizResultRow> Rows)
+/// <summary>Слово перешло на другую стадию изучения по итогам теста.</summary>
+public sealed record WordStageChange(string English, WordStage From, WordStage To)
 {
+    public bool IsPromotion => To > From;
+}
+
+public sealed record QuizResult(IReadOnlyList<QuizResultRow> Rows, IReadOnlyList<WordStageChange>? Changes = null)
+{
+    /// <summary>Изменения стадий слов за этот тест (для результатов из истории пусто).</summary>
+    public IReadOnlyList<WordStageChange> StageChanges => Changes ?? [];
+
     public int Total => Rows.Count;
 
     public int CorrectCount => Rows.Count(r => r.IsCorrect);

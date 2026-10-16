@@ -1,6 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EngMemAssist.Core.Models;
+using EngMemAssist.Core.Services;
+using EngMemAssist.Infrastructure;
 using EngMemAssist.Navigation;
 
 namespace EngMemAssist.ViewModels;
@@ -9,6 +11,7 @@ namespace EngMemAssist.ViewModels;
 public sealed partial class ResultsViewModel : PageViewModelBase
 {
     private readonly INavigationService _navigation;
+    private readonly ISoundService _sound;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SummaryText))]
@@ -22,9 +25,29 @@ public sealed partial class ResultsViewModel : PageViewModelBase
     [ObservableProperty]
     private bool _isHistory;
 
-    public ResultsViewModel(INavigationService navigation)
+    public ResultsViewModel(INavigationService navigation, ISoundService sound)
     {
+        _sound = sound;
         _navigation = navigation;
+    }
+
+    /// <summary>Итог теста в виде рассказа.</summary>
+    [ObservableProperty]
+    private QuizStory? _story;
+
+    partial void OnResultChanged(QuizResult? value) => Story = value is null ? null : QuizStoryBuilder.Build(value);
+
+    /// <summary>Конфетти — только сразу после теста, пройденного без единой ошибки.</summary>
+    public bool ShowConfetti => !IsHistory && Result is { Total: > 0 } r && r.CorrectCount == r.Total;
+
+    public override Task OnNavigatedToAsync()
+    {
+        if (ShowConfetti)
+        {
+            _sound.Play(SoundEffect.Fanfare);
+        }
+
+        return Task.CompletedTask;
     }
 
     public override string Title => "Результаты";

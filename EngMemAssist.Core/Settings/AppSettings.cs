@@ -31,6 +31,12 @@ public sealed class AppSettings
     /// <summary>Стратегия выбора слов для квиза (выбирается на главной).</summary>
     public Models.QuizStrategy QuizStrategy { get; set; } = Models.QuizStrategy.Normal;
 
+    /// <summary>Звуковые эффекты в квизе.</summary>
+    public bool SoundEnabled { get; set; } = true;
+
+    /// <summary>Встряска страницы при неверном ответе.</summary>
+    public bool ShakeOnWrong { get; set; } = true;
+
     public int QuizQuestionCount { get; set; } = 10;
     public int QuizOptionsCount { get; set; } = 8;
     public int SentencesPerWord { get; set; } = 4;

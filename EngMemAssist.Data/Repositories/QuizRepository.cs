@@ -143,12 +143,71 @@ public sealed class QuizRepository : IQuizRepository
         await using var connection = _factory.Create();
         var rows = await connection.QueryAsync<WordDifficulty>(
             """
-            SELECT English, Translation, CorrectCount, WrongCount
+            SELECT Id AS WordId, English, Translation, CorrectCount, WrongCount
             FROM Words
             WHERE IsRemoved = 0
             ORDER BY English COLLATE NOCASE
             """);
-        return rows.AsList();
+        var list = rows.AsList();
+
+        var progress = await GetWordProgressAsync();
+        foreach (var word in list)
+        {
+            var p = progress.GetValueOrDefault(word.WordId, WordProgress.Empty);
+            word.Streak = p.Streak;
+            word.Stage = p.Stage;
+        }
+
+        return list;
+    }
+
+    public async Task<IReadOnlyDictionary<long, WordProgress>> GetWordProgressAsync(IReadOnlyCollection<long>? wordIds = null)
+    {
+        await using var connection = _factory.Create();
+
+        var sql = wordIds is null
+            ? "SELECT WordId, IsCorrect FROM QuizAnswers ORDER BY WordId, Id"
+            : "SELECT WordId, IsCorrect FROM QuizAnswers WHERE WordId IN @ids ORDER BY WordId, Id";
+        if (wordIds is { Count: 0 })
+        {
+            return new Dictionary<long, WordProgress>();
+        }
+
+        var rows = await connection.QueryAsync<ProgressRow>(sql, new { ids = wordIds });
+
+        var result = new Dictionary<long, WordProgress>();
+        foreach (var row in rows)
+        {
+            var current = result.GetValueOrDefault(row.WordId, WordProgress.Empty);
+            result[row.WordId] = new WordProgress(current.Answers + 1, row.IsCorrect ? current.Streak + 1 : 0);
+        }
+
+        return result;
+    }
+
+    public async Task<IReadOnlyDictionary<DateOnly, int>> GetDailyActivityAsync(int days)
+    {
+        await using var connection = _factory.Create();
+        var since = DateTime.UtcNow.AddDays(-(days + 1));
+
+        var rows = await connection.QueryAsync<ActivityRow>(
+            "SELECT AnsweredAt FROM QuizAnswers WHERE AnsweredAt >= @since",
+            new { since });
+
+        return rows
+            .GroupBy(r => DateOnly.FromDateTime(DateTime.SpecifyKind(r.AnsweredAt, DateTimeKind.Utc).ToLocalTime()))
+            .ToDictionary(g => g.Key, g => g.Count());
+    }
+
+    private sealed class ActivityRow
+    {
+        public DateTime AnsweredAt { get; set; }
+    }
+
+    private sealed class ProgressRow
+    {
+        public long WordId { get; set; }
+        public bool IsCorrect { get; set; }
     }
 
     public async Task<IReadOnlyList<WordDifficulty>> GetHardestWordsAsync(int take)

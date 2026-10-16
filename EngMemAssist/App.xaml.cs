@@ -91,6 +91,7 @@ public partial class App : Application
         services.AddSingleton<SyncCoordinator>();
 
         services.AddSingleton<AppBackgroundService>();
+        services.AddSingleton<ISoundService, SoundService>();
         services.AddSingleton<MainWindow>();
         services.AddSingleton<MainViewModel>();
 

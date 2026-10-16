@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using EngMemAssist.Core.Models;
 using EngMemAssist.Core.Services;
 using EngMemAssist.Core.Settings;
+using EngMemAssist.Infrastructure;
 using EngMemAssist.Navigation;
 
 namespace EngMemAssist.ViewModels;
@@ -13,6 +14,7 @@ public sealed partial class QuizViewModel : PageViewModelBase
     private readonly IQuizService _quiz;
     private readonly ISettingsService _settings;
     private readonly INavigationService _navigation;
+    private readonly ISoundService _sound;
 
     private List<QuizQuestion> _questions = [];
     private readonly List<string?> _answers = [];
@@ -20,6 +22,8 @@ public sealed partial class QuizViewModel : PageViewModelBase
     private int _hintsUsed;
     private DateTime _startedAt;
     private bool _isFinishing;
+    private bool _isAnswering;
+    private bool _cancelled;
 
     [ObservableProperty]
     private QuizQuestion? _current;
@@ -54,8 +58,13 @@ public sealed partial class QuizViewModel : PageViewModelBase
     partial void OnExtraSentenceChanged(QuizSentence? value) => OnPropertyChanged(nameof(HasExtraSentence));
 
 
-    public QuizViewModel(IQuizService quiz, ISettingsService settings, INavigationService navigation)
+    /// <summary>Неверный ответ: страница должна встряхнуться (подписывается View).</summary>
+    public event EventHandler? ShakeRequested;
+
+    public QuizViewModel(
+        IQuizService quiz, ISettingsService settings, INavigationService navigation, ISoundService sound)
     {
+        _sound = sound;
         _quiz = quiz;
         _settings = settings;
         _navigation = navigation;
@@ -105,7 +114,7 @@ public sealed partial class QuizViewModel : PageViewModelBase
     }
 
     private bool CanUseHint() =>
-        !_isFinishing && Current is not null && _hintsUsed < HintsTotal && CurrentHint == QuizHint.None;
+        !_isFinishing && !_isAnswering && Current is not null && _hintsUsed < HintsTotal && CurrentHint == QuizHint.None;
 
     private bool TakeHint(QuizHint hint)
     {
@@ -146,7 +155,28 @@ public sealed partial class QuizViewModel : PageViewModelBase
     [RelayCommand]
     private async Task SelectOptionAsync(string? option)
     {
-        if (_isFinishing || Current is null)
+        if (_isFinishing || _isAnswering || Current is null)
+        {
+            return;
+        }
+
+        // Короткая пауза с обратной связью: звук и (при ошибке) встряска, затем следующий вопрос.
+        _isAnswering = true;
+        var correct = Current.IsCorrect(option);
+        _sound.Play(correct ? SoundEffect.Correct : SoundEffect.Wrong);
+
+        if (!correct && _settings.Current.ShakeOnWrong)
+        {
+            ShakeRequested?.Invoke(this, EventArgs.Empty);
+            await Task.Delay(450);
+        }
+        else
+        {
+            await Task.Delay(220);
+        }
+
+        _isAnswering = false;
+        if (_cancelled)
         {
             return;
         }
@@ -157,6 +187,7 @@ public sealed partial class QuizViewModel : PageViewModelBase
         if (_answers.Count < _questions.Count)
         {
             Show(_answers.Count);
+            _sound.Play(SoundEffect.Next);
             return;
         }
 
@@ -177,5 +208,9 @@ public sealed partial class QuizViewModel : PageViewModelBase
     }
 
     [RelayCommand]
-    private void Cancel() => _navigation.NavigateTo<HomeViewModel>();
+    private void Cancel()
+    {
+        _cancelled = true;
+        _navigation.NavigateTo<HomeViewModel>();
+    }
 }
