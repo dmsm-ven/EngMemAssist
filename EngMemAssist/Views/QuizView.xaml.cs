@@ -156,47 +156,82 @@ public partial class QuizView : UserControl
         SpawnSpeedLines(width, height);
     }
 
-    /// <summary>Тонкие горизонтальные штрихи пролетают справа налево — как «линии скорости» в аниме.</summary>
+    /// <summary>Спрайты ветра (прозрачные PNG с изогнутыми штрихами и завитками), загружаются один раз.</summary>
+    private static readonly Lazy<BitmapImage[]> WindSprites = new(() =>
+        Enumerable.Range(1, 8).Select(i =>
+        {
+            var image = new BitmapImage();
+            image.BeginInit();
+            image.UriSource = new Uri($"pack://application:,,,/Assets/Wind/wind{i}.png", UriKind.Absolute);
+            image.CacheOption = BitmapCacheOption.OnLoad;
+            image.EndInit();
+            image.Freeze();
+            return image;
+        }).ToArray());
+
+    /// <summary>
+    /// Воздушные потоки: изогнутые штрихи разного размера и наклона пролетают в основном справа налево,
+    /// часть из них отражена и летит под другим углом или навстречу. Цвет берётся из акцента темы.
+    /// </summary>
     private void SpawnSpeedLines(double width, double height)
     {
         var random = new Random();
+        var sprites = WindSprites.Value;
         var color = TryFindResource("SystemAccentColorPrimary") is Color accent ? accent : Colors.Gray;
+        var tint = new SolidColorBrush(Color.FromRgb(color.R, color.G, color.B));
+        tint.Freeze();
 
-        for (var i = 0; i < 18; i++)
+        for (var i = 0; i < 16; i++)
         {
-            var length = random.Next(140, 420);
-            var line = new Rectangle
+            var sprite = sprites[random.Next(sprites.Length)];
+            var w = random.Next(280, 720);
+            var h = w / 4.0;
+            var reverse = random.NextDouble() < 0.2;
+            var angle = random.NextDouble() * 44 - 22;           // наклон потока, градусы
+            var flipY = random.Next(2) == 0 ? -1 : 1;             // зеркальное отражение — другой изгиб
+            var flipX = reverse ? -1 : (random.Next(4) == 0 ? -1 : 1);
+
+            var scale = new ScaleTransform(flipX, flipY);
+            var rotate = new RotateTransform(reverse ? -angle : angle);
+            var shift = new TranslateTransform();
+
+            var piece = new Rectangle
             {
-                Width = length,
-                Height = random.NextDouble() * 2 + 1,
-                RadiusX = 1,
-                RadiusY = 1,
+                Width = w,
+                Height = h,
+                Fill = tint,
+                OpacityMask = new ImageBrush(sprite) { Stretch = Stretch.Fill },
                 Opacity = 0,
-                Fill = new LinearGradientBrush(
-                    new GradientStopCollection
-                    {
-                        new GradientStop(Color.FromArgb(0, color.R, color.G, color.B), 0),
-                        new GradientStop(Color.FromArgb(200, color.R, color.G, color.B), 1),
-                    },
-                    new Point(0, 0), new Point(1, 0)),
+                RenderTransformOrigin = new Point(0.5, 0.5),
+                RenderTransform = new TransformGroup { Children = { scale, rotate, shift } },
             };
 
-            Canvas.SetTop(line, random.NextDouble() * height);
-            Canvas.SetLeft(line, width);
-            SpeedLines.Children.Add(line);
+            Canvas.SetLeft(piece, 0);
+            Canvas.SetTop(piece, random.NextDouble() * height - h / 2);
+            SpeedLines.Children.Add(piece);
 
-            var delay = TimeSpan.FromMilliseconds(random.Next(0, 140));
-            var flight = new Duration(TimeSpan.FromMilliseconds(random.Next(260, 420)));
+            // Движение вдоль оси спрайта: основной поток — справа налево, «встречные» — медленнее и бледнее.
+            var distance = width + w;
+            var dx = reverse ? distance : -distance;
+            var startX = reverse ? -w : width;
+            var dy = dx * Math.Tan((reverse ? -angle : angle) * Math.PI / 180) * (reverse ? -1 : 1);
 
-            var move = new DoubleAnimation(width, -length, flight) { BeginTime = delay };
-            move.Completed += (_, _) => SpeedLines.Children.Remove(line);
-            line.BeginAnimation(Canvas.LeftProperty, move);
+            var delay = TimeSpan.FromMilliseconds(random.Next(0, 180));
+            var flight = new Duration(TimeSpan.FromMilliseconds(reverse ? random.Next(550, 800) : random.Next(380, 620)));
 
+            var move = new DoubleAnimation(startX, startX + dx, flight) { BeginTime = delay };
+            move.Completed += (_, _) => SpeedLines.Children.Remove(piece);
+            shift.BeginAnimation(TranslateTransform.XProperty, move);
+            shift.BeginAnimation(TranslateTransform.YProperty,
+                new DoubleAnimation(0, dy, flight) { BeginTime = delay });
+
+            var peak = reverse ? 0.35 : 0.8;
             var fade = new DoubleAnimationUsingKeyFrames { BeginTime = delay, Duration = flight };
             fade.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromPercent(0)));
-            fade.KeyFrames.Add(new LinearDoubleKeyFrame(0.85, KeyTime.FromPercent(0.25)));
+            fade.KeyFrames.Add(new LinearDoubleKeyFrame(peak, KeyTime.FromPercent(0.3)));
+            fade.KeyFrames.Add(new LinearDoubleKeyFrame(peak * 0.7, KeyTime.FromPercent(0.7)));
             fade.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromPercent(1)));
-            line.BeginAnimation(OpacityProperty, fade);
+            piece.BeginAnimation(OpacityProperty, fade);
         }
     }
 }
