@@ -9,7 +9,6 @@
 
   <ItemGroup>
     <Resource Include="Assets\app.ico" />
-    <Resource Include="Assets\Wind\*.png" />
   </ItemGroup>
 
   <ItemGroup>
