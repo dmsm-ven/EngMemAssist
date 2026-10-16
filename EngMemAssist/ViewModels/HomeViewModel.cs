@@ -30,9 +30,8 @@ public sealed partial class HomeViewModel : PageViewModelBase
         ISettingsService settings)
     {
         _settings = settings;
-        Strategies = QuizStrategyExtensions.All
-            .Select(s => new StrategyOption(s, s == settings.Current.QuizStrategy, OnStrategySelected))
-            .ToList();
+        Strategies = QuizStrategyExtensions.All.Select(s => new StrategyOption(s)).ToList();
+        _selectedStrategy = Strategies.FirstOrDefault(o => o.Strategy == settings.Current.QuizStrategy) ?? Strategies[0];
         RecentSessions = recentSessions;
         _navigation = navigation;
         _words = words;
@@ -47,9 +46,18 @@ public sealed partial class HomeViewModel : PageViewModelBase
 
     public IReadOnlyList<StrategyOption> Strategies { get; }
 
-    private void OnStrategySelected(StrategyOption option)
+    /// <summary>Выбранная плитка (ровно одна, как в radio-группе); сохраняется в настройки.</summary>
+    [ObservableProperty]
+    private StrategyOption _selectedStrategy;
+
+    partial void OnSelectedStrategyChanged(StrategyOption value)
     {
-        _settings.Current.QuizStrategy = option.Strategy;
+        if (value is null)
+        {
+            return;
+        }
+
+        _settings.Current.QuizStrategy = value.Strategy;
         _settings.Save();
     }
 

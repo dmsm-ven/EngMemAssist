@@ -2,14 +2,48 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-             xmlns:local="clr-namespace:EngMemAssist.Views">
+             xmlns:local="clr-namespace:EngMemAssist.Views"
+             xmlns:infra="clr-namespace:EngMemAssist.Infrastructure">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
+
+        <!-- Плитка стратегии: ListBox с одиночным выбором работает как radio-группа, но выглядит как карточка -->
+        <Style x:Key="StrategyTileItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Height" Value="80" />
+            <Setter Property="Margin" Value="4" />
+            <Setter Property="Padding" Value="14,8" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Tile" Padding="{TemplateBinding Padding}" CornerRadius="8" BorderThickness="1"
+                                Background="{DynamicResource ControlFillColorDefaultBrush}"
+                                BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
+                            <ContentPresenter VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Tile" Property="Background" Value="{DynamicResource ControlFillColorSecondaryBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Tile" Property="BorderThickness" Value="2" />
+                                <Setter TargetName="Tile" Property="BorderBrush" Value="{DynamicResource SystemAccentColorPrimaryBrush}" />
+                                <Setter TargetName="Tile" Property="Background" Value="{DynamicResource ControlFillColorSecondaryBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-    <StackPanel MaxWidth="680" Margin="0,0,16,0" HorizontalAlignment="Left">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" infra:PageScroll.ForwardWheel="True">
+    <!-- Страница на всю ширину, содержимое по центру -->
+    <StackPanel MaxWidth="1000" Margin="0,0,16,0" HorizontalAlignment="Center">
         <TextBlock FontSize="28" FontWeight="SemiBold" Text="EngMemAssist" />
         <TextBlock Margin="0,4,0,24" Opacity="0.7" Text="Личный помощник по запоминанию английских слов" />
 
@@ -24,26 +58,35 @@
             </StackPanel>
         </ui:Card>
 
-        <ui:Card Margin="0,0,0,16" Padding="16">
-            <StackPanel>
-                <TextBlock Margin="0,0,0,8" FontSize="16" FontWeight="SemiBold" Text="Режим квиза" />
-                <ItemsControl ItemsSource="{Binding Strategies}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <RadioButton Margin="0,0,0,4" GroupName="QuizStrategy" IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                         ToolTip="{Binding Description}">
-                                <StackPanel>
-                                    <TextBlock Text="{Binding Title}" />
-                                    <TextBlock FontSize="12" Opacity="0.6" TextWrapping="Wrap" Text="{Binding Description}" />
-                                </StackPanel>
-                            </RadioButton>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </StackPanel>
-        </ui:Card>
+        <TextBlock Margin="4,0,0,4" FontSize="16" FontWeight="SemiBold" Text="Режим квиза" />
+        <ListBox Margin="0,0,0,16" Background="Transparent" BorderThickness="0" SelectionMode="Single"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                 ItemContainerStyle="{StaticResource StrategyTileItemStyle}"
+                 ItemsSource="{Binding Strategies}" SelectedItem="{Binding SelectedStrategy, Mode=TwoWay}">
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Columns="3" />
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid ToolTip="{Binding Description}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="48" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="30" Text="{Binding Icon}" />
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Text="{Binding Title}" />
+                            <TextBlock MaxHeight="32" FontSize="12" Opacity="0.65" TextWrapping="Wrap"
+                                       TextTrimming="CharacterEllipsis" Text="{Binding Description}" />
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
 
-        <StackPanel Orientation="Horizontal">
+        <StackPanel Margin="4,0,0,0" Orientation="Horizontal">
             <ui:Button Margin="0,0,8,0" Padding="24,10" Appearance="Primary" Command="{Binding StartQuizCommand}" Content="Начать квиз" />
             <ui:Button Margin="0,0,8,0" Padding="16,10" Command="{Binding SyncCommand}" Content="Синхронизировать" />
             <ui:Button Padding="16,10" Command="{Binding ConnectCommand}" Content="Подключить таблицу"

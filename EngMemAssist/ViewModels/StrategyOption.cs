@@ -1,21 +1,13 @@
-using CommunityToolkit.Mvvm.ComponentModel;
 using EngMemAssist.Core.Models;
 
 namespace EngMemAssist.ViewModels;
 
-/// <summary>Один пункт выбора стратегии квиза (radio-кнопка на главной).</summary>
-public sealed partial class StrategyOption : ObservableObject
+/// <summary>Плитка выбора стратегии квиза на главной.</summary>
+public sealed class StrategyOption
 {
-    private readonly Action<StrategyOption> _onSelected;
-
-    [ObservableProperty]
-    private bool _isSelected;
-
-    public StrategyOption(QuizStrategy strategy, bool isSelected, Action<StrategyOption> onSelected)
+    public StrategyOption(QuizStrategy strategy)
     {
         Strategy = strategy;
-        _isSelected = isSelected;
-        _onSelected = onSelected;
     }
 
     public QuizStrategy Strategy { get; }
@@ -24,11 +16,5 @@ public sealed partial class StrategyOption : ObservableObject
 
     public string Description => Strategy.Description();
 
-    partial void OnIsSelectedChanged(bool value)
-    {
-        if (value)
-        {
-            _onSelected(this);
-        }
-    }
+    public string Icon => Strategy.Icon();
 }

@@ -35,6 +35,18 @@ public static class QuizStrategyExtensions
         _ => strategy.ToString(),
     };
 
+    /// <summary>Уникальная иконка стратегии для плитки на главной.</summary>
+    public static string Icon(this QuizStrategy strategy) => strategy switch
+    {
+        QuizStrategy.Normal => "🧠",
+        QuizStrategy.Hardest => "🔥",
+        QuizStrategy.LeastPlayed => "👀",
+        QuizStrategy.Forgotten => "⏳",
+        QuizStrategy.Newest => "🆕",
+        QuizStrategy.Random => "🎲",
+        _ => "❔",
+    };
+
     public static string Description(this QuizStrategy strategy) => strategy switch
     {
         QuizStrategy.Normal => "Случайные слова: чаще те, где были ошибки, новые и давно не проверявшиеся",
