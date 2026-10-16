@@ -152,7 +152,7 @@ public sealed class QuizService : IQuizService
     }
 
     private static readonly QuizStrategy[] RandomPool =
-        [QuizStrategy.Normal, QuizStrategy.Hardest, QuizStrategy.LeastPlayed, QuizStrategy.Forgotten];
+        [QuizStrategy.Normal, QuizStrategy.Hardest, QuizStrategy.LeastPlayed, QuizStrategy.Forgotten, QuizStrategy.Newest];
 
     /// <summary>Выбирает слова по стратегии; если подходящих слов не хватает, остаток добирается обычным взвешенным выбором.</summary>
     private static List<Word> PickWords(List<Word> candidates, int count, QuizStrategy strategy)
@@ -176,6 +176,7 @@ public sealed class QuizService : IQuizService
             QuizStrategy.Forgotten => TakeFromTop(
                 candidates.Where(w => w.LastAskedAt is not null).OrderBy(w => w.LastAskedAt),
                 count),
+            QuizStrategy.Newest => TakeFromTop(candidates.OrderByDescending(w => w.AddedAt), count, poolFactor: 1),
             _ => [],
         };
 

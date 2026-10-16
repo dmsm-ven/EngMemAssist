@@ -61,6 +61,9 @@ public sealed partial class QuizViewModel : PageViewModelBase
     /// <summary>Неверный ответ: страница должна встряхнуться (подписывается View).</summary>
     public event EventHandler? ShakeRequested;
 
+    /// <summary>Сразу перед сменой вопроса: View делает снимок текущего вопроса для анимации «уезжания».</summary>
+    public event EventHandler? QuestionChanging;
+
     public QuizViewModel(
         IQuizService quiz, ISettingsService settings, INavigationService navigation, ISoundService sound)
     {
@@ -186,6 +189,7 @@ public sealed partial class QuizViewModel : PageViewModelBase
 
         if (_answers.Count < _questions.Count)
         {
+            QuestionChanging?.Invoke(this, EventArgs.Empty);
             Show(_answers.Count);
             _sound.Play(SoundEffect.Next);
             return;

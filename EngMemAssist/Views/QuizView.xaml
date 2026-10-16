@@ -1,10 +1,12 @@
 <UserControl x:Class="EngMemAssist.Views.QuizView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:infra="clr-namespace:EngMemAssist.Infrastructure">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+        <infra:IndexToLetterConverter x:Key="IndexToLetter" />
     </UserControl.Resources>
 
     <Grid x:Name="Root" RenderTransformOrigin="0.5,0.5">
@@ -23,47 +25,76 @@
             <ui:Button HorizontalAlignment="Right" Command="{Binding CancelCommand}" Content="Прервать" />
         </Grid>
 
-        <TextBlock Grid.Row="1" Margin="0,24,0,8" Opacity="0.7" Text="Выберите перевод выделенного слова:" />
+        <Grid x:Name="QuestionHost" Grid.Row="1" Grid.RowSpan="3" ClipToBounds="True">
+            <Grid x:Name="ContentLayer">
+                <Grid.RenderTransform>
+                    <TranslateTransform x:Name="ContentShift" />
+                </Grid.RenderTransform>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
 
-        <Grid Grid.Row="2">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Margin="0,24,0,8" Opacity="0.7" Text="Выберите перевод выделенного слова:" />
 
-            <TextBlock Grid.Row="0" Margin="0,0,0,16" FontSize="24" TextWrapping="Wrap"><Run Text="{Binding Current.Before, Mode=OneWay}" /><Run FontWeight="Bold" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" Text="{Binding Current.Highlighted, Mode=OneWay}" /><Run Text="{Binding Current.After, Mode=OneWay}" /><InlineUIContainer BaselineAlignment="Center"><Border Width="22" Height="22" Margin="10,0,0,0" Background="Transparent" BorderBrush="{DynamicResource TextFillColorSecondaryBrush}" BorderThickness="1" CornerRadius="11" Cursor="Help" ToolTipService.InitialShowDelay="100" ToolTip="{Binding DataContext.Current.SourceText, RelativeSource={RelativeSource AncestorType=UserControl}}"><TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" Opacity="0.7" Text="?" /></Border></InlineUIContainer></TextBlock>
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="1" Margin="0,0,0,16" Visibility="{Binding HasHints, Converter={StaticResource BoolToVisibility}}">
-                <StackPanel Orientation="Horizontal">
-                    <ui:Button Width="48" Height="48" Margin="0,0,8,0" Padding="0" FontSize="22"
-                               Command="{Binding UseFiftyFiftyCommand}" Content="½" ToolTip="Убрать половину неверных вариантов" />
-                    <ui:Button Width="48" Height="48" Padding="0" FontSize="22"
-                               Command="{Binding UseExtraContextCommand}" Content="💬" ToolTip="Показать ещё одно предложение со словом" />
+                <TextBlock Grid.Row="0" Margin="0,0,0,16" FontSize="24" TextWrapping="Wrap"><Run Text="{Binding Current.Before, Mode=OneWay}" /><Run FontWeight="Bold" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" Text="{Binding Current.Highlighted, Mode=OneWay}" /><Run Text="{Binding Current.After, Mode=OneWay}" /><InlineUIContainer BaselineAlignment="Center"><Border Width="22" Height="22" Margin="10,0,0,0" Background="Transparent" BorderBrush="{DynamicResource TextFillColorSecondaryBrush}" BorderThickness="1" CornerRadius="11" Cursor="Help" ToolTipService.InitialShowDelay="100" ToolTip="{Binding DataContext.Current.SourceText, RelativeSource={RelativeSource AncestorType=UserControl}}"><TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" Opacity="0.7" Text="?" /></Border></InlineUIContainer></TextBlock>
+
+                <StackPanel Grid.Row="1" Margin="0,0,0,16" Visibility="{Binding HasHints, Converter={StaticResource BoolToVisibility}}">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:Button Width="48" Height="48" Margin="0,0,8,0" Padding="0" FontSize="22"
+                                   Command="{Binding UseFiftyFiftyCommand}" Content="½" ToolTip="Убрать половину неверных вариантов" />
+                        <ui:Button Width="48" Height="48" Padding="0" FontSize="22"
+                                   Command="{Binding UseExtraContextCommand}" Content="💬" ToolTip="Показать ещё одно предложение со словом" />
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
 
-            <StackPanel Grid.Row="2" Margin="0,0,0,16">
-                <TextBlock Margin="0,0,0,4" FontSize="18" Opacity="0.85" TextWrapping="Wrap"
-                           Visibility="{Binding HasExtraSentence, Converter={StaticResource BoolToVisibility}}"><Run Text="{Binding ExtraSentence.Before, Mode=OneWay}" /><Run FontWeight="Bold" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" Text="{Binding ExtraSentence.Highlighted, Mode=OneWay}" /><Run Text="{Binding ExtraSentence.After, Mode=OneWay}" /><InlineUIContainer BaselineAlignment="Center"><Border Width="22" Height="22" Margin="10,0,0,0" Background="Transparent" BorderBrush="{DynamicResource TextFillColorSecondaryBrush}" BorderThickness="1" CornerRadius="11" Cursor="Help" ToolTipService.InitialShowDelay="100" ToolTip="{Binding DataContext.ExtraSentence.SourceText, RelativeSource={RelativeSource AncestorType=UserControl}}"><TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" Opacity="0.7" Text="?" /></Border></InlineUIContainer></TextBlock>
-            </StackPanel>
+                <StackPanel Grid.Row="2" Margin="0,0,0,16">
+                    <TextBlock Margin="0,0,0,4" FontSize="18" Opacity="0.85" TextWrapping="Wrap"
+                               Visibility="{Binding HasExtraSentence, Converter={StaticResource BoolToVisibility}}"><Run Text="{Binding ExtraSentence.Before, Mode=OneWay}" /><Run FontWeight="Bold" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" Text="{Binding ExtraSentence.Highlighted, Mode=OneWay}" /><Run Text="{Binding ExtraSentence.After, Mode=OneWay}" /><InlineUIContainer BaselineAlignment="Center"><Border Width="22" Height="22" Margin="10,0,0,0" Background="Transparent" BorderBrush="{DynamicResource TextFillColorSecondaryBrush}" BorderThickness="1" CornerRadius="11" Cursor="Help" ToolTipService.InitialShowDelay="100" ToolTip="{Binding DataContext.ExtraSentence.SourceText, RelativeSource={RelativeSource AncestorType=UserControl}}"><TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" Opacity="0.7" Text="?" /></Border></InlineUIContainer></TextBlock>
+                </StackPanel>
 
-            <ItemsControl Grid.Row="3" ItemsSource="{Binding VisibleOptions}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <UniformGrid Columns="2" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <ui:Button Margin="16,2" Padding="12,14" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
-                                   Command="{Binding DataContext.SelectOptionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                   CommandParameter="{Binding}"
-                                   Content="{Binding}" />
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                <ItemsControl Grid.Row="3" AlternationCount="26" ItemsSource="{Binding VisibleOptions}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="2" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <ui:Button Margin="16,2" Padding="12,14" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                       Command="{Binding DataContext.SelectOptionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                       CommandParameter="{Binding}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Margin="0,0,10,0" FontWeight="Bold" Opacity="0.55"
+                                               Foreground="{DynamicResource SystemAccentColorPrimaryBrush}"
+                                               Text="{Binding Path=(ItemsControl.AlternationIndex), RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource IndexToLetter}}" />
+                                    <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </ui:Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+            </Grid>
+
+            <!-- Снимок предыдущего вопроса: уезжает влево, пока новый въезжает справа -->
+            <Image x:Name="OutgoingImage" HorizontalAlignment="Left" VerticalAlignment="Top" Stretch="Fill"
+                   IsHitTestVisible="False" Visibility="Collapsed">
+                <Image.RenderTransform>
+                    <TranslateTransform x:Name="OutgoingShift" />
+                </Image.RenderTransform>
+            </Image>
+
+            <!-- Линии скорости -->
+            <Canvas x:Name="SpeedLines" IsHitTestVisible="False" />
         </Grid>
     </Grid>
 </UserControl>

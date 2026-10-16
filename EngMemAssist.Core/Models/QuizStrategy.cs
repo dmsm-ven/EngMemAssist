@@ -17,6 +17,9 @@ public enum QuizStrategy
 
     /// <summary>Слова, которые проверялись давно: освежить в памяти.</summary>
     Forgotten = 4,
+
+    /// <summary>Только самые последние добавленные в словарь слова.</summary>
+    Newest = 5,
 }
 
 public static class QuizStrategyExtensions
@@ -27,6 +30,7 @@ public static class QuizStrategyExtensions
         QuizStrategy.Hardest => "Самые сложные слова",
         QuizStrategy.LeastPlayed => "Ещё не учавствовавшие",
         QuizStrategy.Forgotten => "Давно не повторял",
+        QuizStrategy.Newest => "Самые новые слова",
         QuizStrategy.Random => "Случайная стратегия",
         _ => strategy.ToString(),
     };
@@ -37,6 +41,7 @@ public static class QuizStrategyExtensions
         QuizStrategy.Hardest => "Слова с самой большой долей ошибок",
         QuizStrategy.LeastPlayed => "Слова, которых в квизах ещё не было, или они были реже всего",
         QuizStrategy.Forgotten => "Слова, которые проверялись раньше всех остальных",
+        QuizStrategy.Newest => "Только последние добавленные в словарь слова",
         QuizStrategy.Random => "Любая из остальных стратегий, выбранная случайно",
         _ => "",
     };
@@ -48,6 +53,7 @@ public static class QuizStrategyExtensions
         QuizStrategy.Hardest,
         QuizStrategy.LeastPlayed,
         QuizStrategy.Forgotten,
-        QuizStrategy.Random,
+        QuizStrategy.Newest,
+        QuizStrategy.Random, // всегда последней в списке
     ];
 }
