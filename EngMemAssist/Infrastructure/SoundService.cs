@@ -61,14 +61,52 @@ public sealed class SoundService : ISoundService
     {
         SoundEffect.Correct => [(1046.5, 70, 0.22), (1318.5, 120, 0.22)],
         SoundEffect.Wrong => [(196, 130, 0.28), (155.6, 170, 0.28)],
-        SoundEffect.Next => [(660, 40, 0.12)],
         SoundEffect.Fanfare => [(523.3, 110, 0.25), (659.3, 110, 0.25), (784, 110, 0.25), (1046.5, 380, 0.25)],
         _ => [],
     };
 
+    /// <summary>
+    /// «Вжух» ветра: белый шум через полосовой фильтр, центр которого скользит вверх и вниз,
+    /// с нарастанием и затуханием громкости. Длительность примерно как у анимации смены вопроса.
+    /// </summary>
+    private static List<short> Whoosh()
+    {
+        const int ms = 480;
+        const double volume = 0.30;
+        var count = SampleRate * ms / 1000;
+        var samples = new List<short>(count);
+        var random = new Random(7);
+        double low = 0, band = 0;
+
+        for (var i = 0; i < count; i++)
+        {
+            var progress = (double)i / count;
+
+            // Частота фильтра: поднимается к середине и опускается (эффект пролетающего потока).
+            var center = 350 + 1900 * Math.Sin(Math.PI * Math.Pow(progress, 0.8));
+            var f = 2 * Math.Sin(Math.PI * center / SampleRate);
+            const double damping = 0.45; // чем меньше, тем «свистящее»
+
+            var noise = random.NextDouble() * 2 - 1;
+            low += f * band;
+            var high = noise - low - damping * band;
+            band += f * high;
+
+            // Плавное нарастание (~35%) и мягкое затухание.
+            var envelope = progress < 0.35
+                ? Math.Pow(progress / 0.35, 1.5)
+                : Math.Pow(1 - (progress - 0.35) / 0.65, 1.8);
+
+            var value = Math.Clamp(band * 0.9 * envelope * volume, -1.0, 1.0);
+            samples.Add((short)(value * short.MaxValue));
+        }
+
+        return samples;
+    }
+
     private static byte[] Synthesize(SoundEffect effect)
     {
-        var samples = new List<short>();
+        var samples = effect == SoundEffect.Next ? Whoosh() : new List<short>();
 
         foreach (var (freq, ms, volume) in Notes(effect))
         {
