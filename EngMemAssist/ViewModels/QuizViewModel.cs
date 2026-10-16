@@ -1,11 +1,11 @@
-using System.Windows;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EngMemAssist.Core.Models;
 using EngMemAssist.Core.Services;
 using EngMemAssist.Core.Settings;
 using EngMemAssist.Infrastructure;
 using EngMemAssist.Navigation;
+using System.Windows;
 
 namespace EngMemAssist.ViewModels;
 
@@ -191,7 +191,7 @@ public sealed partial class QuizViewModel : PageViewModelBase
         {
             QuestionChanging?.Invoke(this, EventArgs.Empty);
             Show(_answers.Count);
-            _sound.Play(SoundEffect.Next);
+            //_sound.Play(SoundEffect.Next);
             return;
         }
 
