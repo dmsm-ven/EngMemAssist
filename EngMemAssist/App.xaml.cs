@@ -129,6 +129,7 @@ public partial class App : Application
         services.AddSingleton<ILocalSourceService, LocalSourceService>();
         services.AddSingleton<LocalSentenceSearcher>();
         services.AddSingleton<IWordSyncService, WordSyncService>();
+        services.AddSingleton<ManualSentenceService>();
         services.AddSingleton<IQuizService, QuizService>();
 
         services.AddSingleton<INavigationService, NavigationService>();

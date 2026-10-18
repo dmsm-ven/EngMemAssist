@@ -29,8 +29,9 @@ public sealed class SentenceRepository : ISentenceRepository
         foreach (var tag in sentences.Select(s => s.Source).Distinct(StringComparer.OrdinalIgnoreCase))
         {
             var isLocal = tag.StartsWith("local:", StringComparison.OrdinalIgnoreCase);
-            var name = isLocal ? tag[6..] : CanonicalApiName(tag);
-            var kind = isLocal ? 1 : 0;
+            var isUser = string.Equals(tag, Sentence.UserSourceTag, StringComparison.OrdinalIgnoreCase);
+            var name = isUser ? Sentence.UserSourceName : isLocal ? tag[6..] : CanonicalApiName(tag);
+            var kind = isUser ? 2 : isLocal ? 1 : 0;
 
             await connection.ExecuteAsync(
                 "INSERT OR IGNORE INTO SentenceSources (Kind, Name) VALUES (@kind, @name)",

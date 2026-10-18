@@ -53,6 +53,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <TextBlock Margin="0,0,0,8" FontSize="16" FontWeight="SemiBold" Text="Предложения" />
                 <ListBox Grid.Row="1" ItemsSource="{Binding SelectedSentences}" HorizontalContentAlignment="Stretch">
@@ -65,6 +66,43 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
+
+                <Grid Grid.Row="2" Margin="0,8,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <ui:TextBox Margin="0,0,8,0" AcceptsReturn="False" TextWrapping="Wrap" MaxLines="3"
+                                PlaceholderText="Предложение со словом в любой форме"
+                                Text="{Binding NewSentenceText, UpdateSourceTrigger=PropertyChanged}"
+                                Visibility="{Binding IsAddingSentence, Converter={StaticResource BoolToVis}}">
+                        <ui:TextBox.InputBindings>
+                            <KeyBinding Key="Return" Command="{Binding AddSentenceCommand}" />
+                            <KeyBinding Key="Escape" Command="{Binding CancelAddSentenceCommand}" />
+                        </ui:TextBox.InputBindings>
+                    </ui:TextBox>
+
+                    <ui:Button Grid.Column="1" Command="{Binding AddSentenceCommand}" VerticalAlignment="Top">
+                        <ui:Button.Style>
+                            <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
+                                <Setter Property="Icon" Value="{ui:SymbolIcon Add24}" />
+                                <Setter Property="ToolTip" Value="Добавить своё предложение для выбранного слова" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsAddingSentence}" Value="True">
+                                        <Setter Property="Icon" Value="{ui:SymbolIcon Checkmark24}" />
+                                        <Setter Property="ToolTip" Value="Сохранить предложение" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ui:Button.Style>
+                    </ui:Button>
+
+                    <ui:Button Grid.Column="2" Margin="8,0,0,0" VerticalAlignment="Top" ToolTip="Отмена"
+                               Icon="{ui:SymbolIcon Dismiss24}" Command="{Binding CancelAddSentenceCommand}"
+                               Visibility="{Binding IsAddingSentence, Converter={StaticResource BoolToVis}}" />
+                </Grid>
             </Grid>
         </Grid>
     </Grid>

@@ -1,7 +1,7 @@
 namespace EngMemAssist.Core.Models;
 
 /// <summary>Слово из таблицы-источника, сохранённое в локальной БД.</summary>
-public sealed class Word
+public sealed class Word : System.ComponentModel.INotifyPropertyChanged
 {
     public long Id { get; set; }
 
@@ -27,7 +27,22 @@ public sealed class Word
     public DateTime? SentencesFetchedAt { get; set; }
 
     /// <summary>Сколько проверочных предложений загружено (не хранится в Words, заполняется при показе списка).</summary>
-    public int SentenceCount { get; set; }
+    public int SentenceCount
+    {
+        get => _sentenceCount;
+        set
+        {
+            if (_sentenceCount != value)
+            {
+                _sentenceCount = value;
+                PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(SentenceCount)));
+            }
+        }
+    }
+
+    private int _sentenceCount;
+
+    public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
 
     /// <summary>Отдельные значения перевода (любое из них считается верным).</summary>
     public IReadOnlyList<string> GetTranslations() =>

@@ -8,6 +8,12 @@ public sealed class Sentence
     public string Text { get; set; } = "";
     public string? Translation { get; set; }
 
+    /// <summary>Значение <see cref="Source"/> для предложений, введённых вручную.</summary>
+    public const string UserSourceTag = "user";
+
+    /// <summary>Название источника для предложений, введённых вручную.</summary>
+    public const string UserSourceName = "Введено пользователем";
+
     /// <summary>Откуда взято предложение, например "tatoeba".</summary>
     public string Source { get; set; } = "";
 
@@ -22,13 +28,18 @@ public sealed class Sentence
     /// <summary>Название источника из справочника (только при чтении из БД).</summary>
     public string? SourceName { get; set; }
 
-    /// <summary>0 — внешний API, 1 — локальная текстовая база (только при чтении из БД).</summary>
+    /// <summary>0 — внешний API, 1 — локальная текстовая база, 2 — введено пользователем (только при чтении из БД).</summary>
     public int SourceKind { get; set; }
 
     /// <summary>Подпись источника для подсказки в квизе.</summary>
     public string SourceLabel => string.IsNullOrEmpty(SourceName)
         ? "Источник неизвестен"
-        : SourceKind == 1 ? $"Локальная текстовая база «{SourceName}»" : $"API: {SourceName}";
+        : SourceKind switch
+        {
+            1 => $"Локальная текстовая база «{SourceName}»",
+            2 => UserSourceName,
+            _ => $"API: {SourceName}",
+        };
 
     public bool HasValidMatch =>
         MatchStart >= 0 && MatchLength > 0 && MatchStart + MatchLength <= Text.Length;
