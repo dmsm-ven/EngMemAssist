@@ -40,4 +40,28 @@ public sealed class AppSettings
     public int QuizQuestionCount { get; set; } = 10;
     public int QuizOptionsCount { get; set; } = 8;
     public int SentencesPerWord { get; set; } = 4;
+
+    /// <summary>Напоминать о мини-тесте всплывающим окном из трея (при включении закрытие окна сворачивает приложение в трей).</summary>
+    public bool RemindersEnabled { get; set; }
+
+    /// <summary>Минимальный интервал между напоминаниями, минуты.</summary>
+    public int ReminderIntervalMinutes { get; set; } = 60;
+
+    /// <summary>Максимум напоминаний в сутки.</summary>
+    public int ReminderMaxPerDay { get; set; } = 5;
+
+    /// <summary>Начало «тихих часов» (час 0..23, локальное время). Равно концу — тихих часов нет.</summary>
+    public int ReminderQuietFromHour { get; set; } = 23;
+
+    /// <summary>Конец «тихих часов» (час 0..23).</summary>
+    public int ReminderQuietToHour { get; set; } = 8;
+
+    /// <summary>Когда последний раз показывалось напоминание (UTC).</summary>
+    public DateTime? LastReminderAt { get; set; }
+
+    /// <summary>Дата (локальная), к которой относится счётчик напоминаний.</summary>
+    public DateOnly? ReminderCountDay { get; set; }
+
+    /// <summary>Сколько напоминаний показано в день ReminderCountDay.</summary>
+    public int ReminderCountToday { get; set; }
 }

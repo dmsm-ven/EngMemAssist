@@ -40,6 +40,39 @@
                 </StackPanel>
             </ui:Card>
         </ui:CardExpander>
+        <ui:CardExpander Header="Запуск и напоминания">
+            <ui:Card Padding="16" Margin="0,0,0,16">
+                <StackPanel>
+                    <CheckBox Margin="0,0,0,8" Content="Запускать вместе с Windows" IsChecked="{Binding StartWithWindows}" />
+                    <CheckBox Margin="0,0,0,4" Content="Напоминать о мини-тесте (5 вопросов) всплывающим окном у трея"
+                              IsChecked="{Binding RemindersEnabled}" />
+                    <TextBlock Margin="28,0,0,12" Opacity="0.7" TextWrapping="Wrap"
+                               Text="Пока напоминания включены, кнопка закрытия окна сворачивает приложение в трей. Выйти можно через меню значка в трее." />
+
+                    <StackPanel IsEnabled="{Binding RemindersEnabled}">
+                        <TextBlock Margin="0,0,0,4" Text="Интервал между напоминаниями, мин" />
+                        <ComboBox Width="120" Margin="0,0,0,12" HorizontalAlignment="Left"
+                                  ItemsSource="{Binding ReminderIntervalOptions}" SelectedItem="{Binding ReminderIntervalMinutes}" />
+
+                        <TextBlock Margin="0,0,0,4" Text="Максимум напоминаний в сутки" />
+                        <ComboBox Width="120" Margin="0,0,0,12" HorizontalAlignment="Left"
+                                  ItemsSource="{Binding ReminderMaxPerDayOptions}" SelectedItem="{Binding ReminderMaxPerDay}" />
+
+                        <TextBlock Margin="0,0,0,4" Text="Не беспокоить (часы)" />
+                        <StackPanel Margin="0,0,0,12" Orientation="Horizontal">
+                            <TextBlock Margin="0,0,8,0" VerticalAlignment="Center" Text="с" />
+                            <ComboBox Width="80" ItemsSource="{Binding HourOptions}" SelectedItem="{Binding QuietFromHour}" />
+                            <TextBlock Margin="12,0,8,0" VerticalAlignment="Center" Text="до" />
+                            <ComboBox Width="80" ItemsSource="{Binding HourOptions}" SelectedItem="{Binding QuietToHour}" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <TextBlock Margin="0,0,0,12" Opacity="0.7" TextWrapping="Wrap"
+                               Text="Окно не появится: в полноэкранных приложениях (игры, видео, презентации), при включённом режиме «Не беспокоить» в Windows, если вы отошли от компьютера больше 5 минут, во время квиза и пока приложение открыто на экране. Если закрывать окно 3 раза подряд, интервал увеличивается." />
+                    <ui:Button Command="{Binding TestReminderCommand}" Content="Показать тестовое уведомление" />
+                </StackPanel>
+            </ui:Card>
+        </ui:CardExpander>
         <ui:CardExpander Header="Локальные источники предложений">
             <ui:Card Padding="16" Margin="0,0,0,16">
                 <StackPanel>

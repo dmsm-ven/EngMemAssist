@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EngMemAssist.Core.Models;
 using EngMemAssist.Core.Services;
@@ -75,12 +75,15 @@ public sealed partial class QuizViewModel : PageViewModelBase
 
     public override string Title => "Квиз";
 
+    /// <summary>Сколько вопросов задать вместо значения из настроек (мини-тест из напоминания). Задаётся до показа страницы.</summary>
+    public int? QuestionCountOverride { get; set; }
+
     public override async Task OnNavigatedToAsync()
     {
         try
         {
             var questions = await _quiz.CreateQuizAsync(
-                _settings.Current.QuizQuestionCount,
+                QuestionCountOverride ?? _settings.Current.QuizQuestionCount,
                 _settings.Current.QuizOptionsCount,
                 _settings.Current.QuizStrategy);
             _questions = questions.ToList();

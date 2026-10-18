@@ -16,10 +16,23 @@ namespace EngMemAssist;
 public partial class App : Application
 {
     private IHost? _host;
+    private SingleInstanceGuard? _instance;
+    private bool _startHidden;
 
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        // Второй запуск (например, ярлык после автозапуска) только будит первый экземпляр.
+        _instance = new SingleInstanceGuard();
+        if (!_instance.IsFirst)
+        {
+            _instance.SignalFirstInstance();
+            Shutdown();
+            return;
+        }
+
+        ShutdownMode = ShutdownMode.OnMainWindowClose;
 
         try
         {
@@ -35,11 +48,34 @@ public partial class App : Application
 
             ThemeHelper.Apply(_host.Services.GetRequiredService<ISettingsService>().Current.Theme);
 
+            var settings = _host.Services.GetRequiredService<ISettingsService>();
+            var shell = _host.Services.GetRequiredService<AppShell>();
+            shell.Initialize();
+
+            // Автозапуск: при включённых напоминаниях окно не показываем, приложение живёт в трее.
+            _startHidden = settings.Current.RemindersEnabled
+                && e.Args.Contains(AutoStart.MinimizedArgument, StringComparer.OrdinalIgnoreCase);
+
             var mainWindow = _host.Services.GetRequiredService<MainWindow>();
             MainWindow = mainWindow;
-            mainWindow.Show();
+            if (!_startHidden)
+            {
+                mainWindow.Show();
+            }
 
             _host.Services.GetRequiredService<INavigationService>().NavigateTo<HomeViewModel>();
+            _host.Services.GetRequiredService<ReminderService>().Start();
+
+            _instance.ListenForActivation(() => Dispatcher.Invoke(shell.ShowMainWindow));
+
+            try
+            {
+                AutoStart.RefreshPath();
+            }
+            catch (Exception)
+            {
+                // Реестр недоступен — не критично.
+            }
         }
         catch (Exception ex)
         {
@@ -50,6 +86,12 @@ public partial class App : Application
         }
 
         // Синхронизация со стартовой таблицей: если таблица не подключена, сначала откроется окно подключения.
+        // В скрытом запуске окно подключения не показываем — оно появится при первом открытии приложения.
+        if (_startHidden && !_host.Services.GetRequiredService<SyncCoordinator>().IsSpreadsheetConfigured)
+        {
+            return;
+        }
+
         try
         {
             await _host.Services.GetRequiredService<SyncCoordinator>().RunStartupAsync();
@@ -63,6 +105,9 @@ public partial class App : Application
 
     protected override async void OnExit(ExitEventArgs e)
     {
+        _host?.Services.GetService<AppShell>()?.Dispose();
+        _instance?.Dispose();
+
         if (_host is not null)
         {
             await _host.StopAsync();
@@ -92,6 +137,8 @@ public partial class App : Application
 
         services.AddSingleton<AppBackgroundService>();
         services.AddSingleton<ISoundService, SoundService>();
+        services.AddSingleton<AppShell>();
+        services.AddSingleton<ReminderService>();
         services.AddSingleton<MainWindow>();
         services.AddSingleton<MainViewModel>();
 

@@ -15,7 +15,27 @@ public sealed partial class SettingsViewModel : PageViewModelBase
 {
     private readonly ISettingsService _settings;
     private readonly ILocalSourceService _localSources;
+    private readonly ReminderService _reminders;
+    private readonly AppShell _shell;
     private bool _loading = true;
+
+    [ObservableProperty]
+    private bool _startWithWindows;
+
+    [ObservableProperty]
+    private bool _remindersEnabled;
+
+    [ObservableProperty]
+    private int _reminderIntervalMinutes;
+
+    [ObservableProperty]
+    private int _reminderMaxPerDay;
+
+    [ObservableProperty]
+    private int _quietFromHour;
+
+    [ObservableProperty]
+    private int _quietToHour;
 
     [ObservableProperty]
     private string _spreadsheetUrl = "";
@@ -48,8 +68,11 @@ public sealed partial class SettingsViewModel : PageViewModelBase
     private string _localSourcesSummary = "";
 
     public SettingsViewModel(
-        ISettingsService settings, SyncCoordinator sync, AppBackgroundService background, ILocalSourceService localSources)
+        ISettingsService settings, SyncCoordinator sync, AppBackgroundService background, ILocalSourceService localSources,
+        ReminderService reminders, AppShell shell)
     {
+        _reminders = reminders;
+        _shell = shell;
         _localSources = localSources;
         LocalSources = new ObservableCollection<LocalSource>(localSources.Sources);
         LocalSourcesSummary = localSources.BuildSummary();
@@ -62,6 +85,13 @@ public sealed partial class SettingsViewModel : PageViewModelBase
         SoundEnabled = settings.Current.SoundEnabled;
         ShakeOnWrong = settings.Current.ShakeOnWrong;
         BackgroundTileScalePercent = Math.Round(settings.Current.BackgroundTileScale * 100);
+
+        StartWithWindows = ReadAutoStart();
+        RemindersEnabled = settings.Current.RemindersEnabled;
+        ReminderIntervalMinutes = settings.Current.ReminderIntervalMinutes;
+        ReminderMaxPerDay = settings.Current.ReminderMaxPerDay;
+        QuietFromHour = settings.Current.ReminderQuietFromHour;
+        QuietToHour = settings.Current.ReminderQuietToHour;
 
         SpreadsheetUrl = settings.Current.SpreadsheetUrl ?? "";
         QuestionCount = settings.Current.QuizQuestionCount;
@@ -143,6 +173,80 @@ public sealed partial class SettingsViewModel : PageViewModelBase
             Background.SetTileScale(value / 100.0);
         }
     }
+
+    public int[] ReminderIntervalOptions { get; } = [15, 30, 45, 60, 90, 120, 180, 240];
+
+    public int[] ReminderMaxPerDayOptions { get; } = [1, 2, 3, 5, 8, 10, 15];
+
+    public int[] HourOptions { get; } = Enumerable.Range(0, 24).ToArray();
+
+    private static bool ReadAutoStart()
+    {
+        try
+        {
+            return AutoStart.IsEnabled;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    partial void OnStartWithWindowsChanged(bool value)
+    {
+        if (_loading)
+        {
+            return;
+        }
+
+        try
+        {
+            AutoStart.Set(value);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Не удалось изменить автозапуск:\n{ex.Message}", "EngMemAssist",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
+    partial void OnRemindersEnabledChanged(bool value)
+    {
+        if (_loading)
+        {
+            return;
+        }
+
+        _settings.Current.RemindersEnabled = value;
+        _settings.Save();
+        _shell.RefreshTray();
+    }
+
+    partial void OnReminderIntervalMinutesChanged(int value) =>
+        SaveReminder(s => s.ReminderIntervalMinutes = value);
+
+    partial void OnReminderMaxPerDayChanged(int value) =>
+        SaveReminder(s => s.ReminderMaxPerDay = value);
+
+    partial void OnQuietFromHourChanged(int value) =>
+        SaveReminder(s => s.ReminderQuietFromHour = value);
+
+    partial void OnQuietToHourChanged(int value) =>
+        SaveReminder(s => s.ReminderQuietToHour = value);
+
+    private void SaveReminder(Action<AppSettings> apply)
+    {
+        if (_loading)
+        {
+            return;
+        }
+
+        apply(_settings.Current);
+        _settings.Save();
+    }
+
+    [RelayCommand]
+    private Task TestReminderAsync() => _reminders.ShowTestAsync();
 
     partial void OnSoundEnabledChanged(bool value)
     {
