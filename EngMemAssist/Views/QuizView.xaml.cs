@@ -1,4 +1,5 @@
 using EngMemAssist.ViewModels;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -34,6 +35,40 @@ public partial class QuizView : UserControl
             _subscribed = vm;
             vm.ShakeRequested += OnShakeRequested;
             vm.QuestionChanging += OnQuestionChanging;
+            vm.PropertyChanged += OnViewModelPropertyChanged;
+            UpdateProgress(animate: false);
+        }
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(QuizViewModel.ProgressValue) or nameof(QuizViewModel.ProgressMax))
+        {
+            UpdateProgress(animate: true);
+        }
+    }
+
+    /// <summary>Полоса прогресса плавно доезжает до числа отвеченных вопросов.</summary>
+    private void UpdateProgress(bool animate)
+    {
+        if (DataContext is not QuizViewModel vm)
+        {
+            return;
+        }
+
+        QuizProgress.Maximum = Math.Max(1, vm.ProgressMax);
+        if (animate)
+        {
+            QuizProgress.BeginAnimation(System.Windows.Controls.Primitives.RangeBase.ValueProperty,
+                new DoubleAnimation(vm.ProgressValue, TimeSpan.FromMilliseconds(500))
+                {
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
+                });
+        }
+        else
+        {
+            QuizProgress.BeginAnimation(System.Windows.Controls.Primitives.RangeBase.ValueProperty, null);
+            QuizProgress.Value = vm.ProgressValue;
         }
     }
 
@@ -43,6 +78,7 @@ public partial class QuizView : UserControl
         {
             _subscribed.ShakeRequested -= OnShakeRequested;
             _subscribed.QuestionChanging -= OnQuestionChanging;
+            _subscribed.PropertyChanged -= OnViewModelPropertyChanged;
             _subscribed = null;
         }
     }

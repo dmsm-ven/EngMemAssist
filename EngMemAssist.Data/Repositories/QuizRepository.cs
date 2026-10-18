@@ -102,7 +102,7 @@ public sealed class QuizRepository : IQuizRepository
         var rows = await connection.QueryAsync<AnswerRow>(
             """
             SELECT w.English                                          AS English,
-                   a.ChosenTranslation                                AS Chosen,
+                   COALESCE(NULLIF(a.ChosenTranslation, ''), '—')    AS Chosen,
                    COALESCE(a.CorrectOption, a.CorrectTranslation)    AS CorrectOption,
                    a.CorrectTranslation                               AS AllTranslations,
                    a.IsCorrect                                        AS IsCorrect,

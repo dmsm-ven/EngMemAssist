@@ -93,6 +93,11 @@ public sealed class AppShell : IDisposable
     public void StartQuickQuiz()
     {
         ShowMainWindow();
+        if (_navigation.Current is QuizViewModel)
+        {
+            return; // квиз уже идёт — не сбрасываем его
+        }
+
         _navigation.NavigateTo<QuizViewModel>(vm => vm.QuestionCountOverride = QuickQuizQuestions);
     }
 

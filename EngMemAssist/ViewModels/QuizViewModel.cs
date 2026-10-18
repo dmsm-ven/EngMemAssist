@@ -49,6 +49,23 @@ public sealed partial class QuizViewModel : PageViewModelBase
     [ObservableProperty]
     private bool _hasHints;
 
+    /// <summary>Сколько вопросов уже отвечено и сколько всего — для полосы прогресса.</summary>
+    [ObservableProperty]
+    private double _progressValue;
+
+    [ObservableProperty]
+    private double _progressMax = 1;
+
+    /// <summary>Подсветка после ответа: выбранный вариант, верен ли он, и верный вариант.</summary>
+    [ObservableProperty]
+    private string? _feedbackChosen;
+
+    [ObservableProperty]
+    private bool _feedbackChosenIsCorrect;
+
+    [ObservableProperty]
+    private string? _feedbackCorrect;
+
     public bool CanExtraContext => Current is { ExtraSentenceList.Count: > 0 };
 
     private int HintsTotal => QuizHintExtensions.Budget(_questions.Count);
@@ -103,6 +120,11 @@ public sealed partial class QuizViewModel : PageViewModelBase
     private void Show(int index)
     {
         Current = _questions[index];
+        FeedbackChosen = null;
+        FeedbackCorrect = null;
+        FeedbackChosenIsCorrect = false;
+        ProgressMax = _questions.Count;
+        ProgressValue = index;
         ProgressText = $"Вопрос {index + 1} из {_questions.Count}";
         VisibleOptions = Current.Options;
         CurrentHint = QuizHint.None;
@@ -159,27 +181,33 @@ public sealed partial class QuizViewModel : PageViewModelBase
     }
 
     [RelayCommand]
-    private async Task SelectOptionAsync(string? option)
+    private Task SelectOptionAsync(string? option) => AnswerAsync(option);
+
+    /// <summary>«Не знаю»: ответ засчитывается как неверный, но показывается верный вариант (без встряски).</summary>
+    [RelayCommand]
+    private Task DontKnowAsync() => AnswerAsync(null);
+
+    private async Task AnswerAsync(string? option)
     {
         if (_isFinishing || _isAnswering || Current is null)
         {
             return;
         }
 
-        // Короткая пауза с обратной связью: звук и (при ошибке) встряска, затем следующий вопрос.
+        // Пауза с обратной связью: подсветка верного/неверного варианта, звук и (при ошибке) встряска, затем следующий вопрос.
         _isAnswering = true;
-        var correct = Current.IsCorrect(option);
+        var correct = option is not null && Current.IsCorrect(option);
+        FeedbackChosen = option;
+        FeedbackChosenIsCorrect = correct;
+        FeedbackCorrect = correct ? option : Current.CorrectOption;
         _sound.Play(correct ? SoundEffect.Correct : SoundEffect.Wrong);
 
-        if (!correct && _settings.Current.ShakeOnWrong)
+        if (!correct && option is not null && _settings.Current.ShakeOnWrong)
         {
             ShakeRequested?.Invoke(this, EventArgs.Empty);
-            await Task.Delay(450);
         }
-        else
-        {
-            await Task.Delay(220);
-        }
+
+        await Task.Delay(correct ? 450 : 850);
 
         _isAnswering = false;
         if (_cancelled)

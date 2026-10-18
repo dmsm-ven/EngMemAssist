@@ -7,6 +7,7 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
         <infra:IndexToLetterConverter x:Key="IndexToLetter" />
+        <infra:OptionFeedbackBrushConverter x:Key="OptionFeedback" />
     </UserControl.Resources>
 
     <Grid x:Name="Root" RenderTransformOrigin="0.5,0.5">
@@ -21,8 +22,13 @@
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0">
-            <TextBlock FontSize="14" Opacity="0.7" Text="{Binding ProgressText}" />
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <TextBlock VerticalAlignment="Center" FontSize="14" Opacity="0.7" Text="{Binding ProgressText}" />
             <ui:Button HorizontalAlignment="Right" Command="{Binding CancelCommand}" Content="Прервать" />
+            <ProgressBar x:Name="QuizProgress" Grid.Row="1" Height="4" Margin="0,10,0,0" Minimum="0" Maximum="1" IsTabStop="False" />
         </Grid>
 
         <Grid x:Name="QuestionHost" Grid.Row="1" Grid.RowSpan="3" ClipToBounds="True">
@@ -43,6 +49,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Margin="0,0,0,16" FontSize="24" TextWrapping="Wrap"><Run Text="{Binding Current.Before, Mode=OneWay}" /><Run FontWeight="Bold" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" Text="{Binding Current.Highlighted, Mode=OneWay}" /><Run Text="{Binding Current.After, Mode=OneWay}" /><InlineUIContainer BaselineAlignment="Center"><Border Width="22" Height="22" Margin="10,0,0,0" Background="Transparent" BorderBrush="{DynamicResource TextFillColorSecondaryBrush}" BorderThickness="1" CornerRadius="11" Cursor="Help" ToolTipService.InitialShowDelay="100" ToolTip="{Binding DataContext.Current.SourceText, RelativeSource={RelativeSource AncestorType=UserControl}}"><TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" Opacity="0.7" Text="?" /></Border></InlineUIContainer></TextBlock>
@@ -73,6 +80,14 @@
                             <ui:Button Margin="16,2" Padding="12,14" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
                                        Command="{Binding DataContext.SelectOptionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                        CommandParameter="{Binding}">
+                                <ui:Button.Background>
+                                    <MultiBinding Converter="{StaticResource OptionFeedback}">
+                                        <Binding />
+                                        <Binding Path="DataContext.FeedbackChosen" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                        <Binding Path="DataContext.FeedbackChosenIsCorrect" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                        <Binding Path="DataContext.FeedbackCorrect" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                    </MultiBinding>
+                                </ui:Button.Background>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Margin="0,0,10,0" FontWeight="Bold" Opacity="0.55"
                                                Foreground="{DynamicResource SystemAccentColorPrimaryBrush}"
@@ -83,6 +98,10 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+
+                <ui:Button Grid.Row="4" Margin="16,12,16,0" Padding="24,10" HorizontalAlignment="Center"
+                           Command="{Binding DontKnowCommand}" Content="Не знаю"
+                           ToolTip="Пропустить вопрос: ответ засчитается как неверный, но вы увидите правильный вариант" />
             </Grid>
             </Grid>
 

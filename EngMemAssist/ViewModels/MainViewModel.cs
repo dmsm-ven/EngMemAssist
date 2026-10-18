@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EngMemAssist.Infrastructure;
@@ -23,6 +23,9 @@ public sealed partial class MainViewModel : ObservableObject
     /// <summary>Сервис навигации; Content окна привязан к его Current.</summary>
     public INavigationService Navigation => _navigation;
 
+    /// <summary>Во время квиза левое меню отключено: выйти можно только кнопкой «Прервать».</summary>
+    public bool IsNavigationEnabled => _navigation.Current is not QuizViewModel;
+
     public bool IsHomeActive => ActiveSection == NavSection.Home;
 
     public bool IsWordsActive => ActiveSection == NavSection.Words;
@@ -40,6 +43,7 @@ public sealed partial class MainViewModel : ObservableObject
             return;
         }
 
+        OnPropertyChanged(nameof(IsNavigationEnabled));
         OnPropertyChanged(nameof(IsHomeActive));
         OnPropertyChanged(nameof(IsWordsActive));
         OnPropertyChanged(nameof(IsStatsActive));
