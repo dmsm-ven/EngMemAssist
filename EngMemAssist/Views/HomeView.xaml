@@ -87,7 +87,7 @@
         </ListBox>
 
         <StackPanel Margin="4,0,0,0" Orientation="Horizontal">
-            <ui:Button Margin="0,0,8,0" Padding="24,10" Appearance="Primary" Command="{Binding StartQuizCommand}" Content="Начать квиз" />
+            <ui:Button x:Name="StartButton" Margin="0,0,8,0" Padding="24,10" Appearance="Primary" Command="{Binding StartQuizCommand}" Content="Начать квиз" />
             <ui:Button Margin="0,0,8,0" Padding="16,10" Command="{Binding SyncCommand}" Content="Синхронизировать" />
             <ui:Button Padding="16,10" Command="{Binding ConnectCommand}" Content="Подключить таблицу"
                        Visibility="{Binding Sync.IsNotConfigured, Converter={StaticResource BoolToVis}}" />

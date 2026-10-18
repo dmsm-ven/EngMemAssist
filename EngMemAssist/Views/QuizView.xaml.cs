@@ -1,4 +1,4 @@
-﻿using EngMemAssist.ViewModels;
+using EngMemAssist.ViewModels;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -47,7 +47,7 @@ public partial class QuizView : UserControl
         }
     }
 
-    // ---------- Клавиши A, B, C… выбирают соответствующий вариант ----------
+    // ---------- Клавиши A, B, C… ставят фокус на вариант, повтор — выбирают ----------
 
     private void AttachKeyboard()
     {
@@ -68,6 +68,10 @@ public partial class QuizView : UserControl
         }
     }
 
+    /// <summary>
+    /// Первое нажатие буквы только ставит фокус на вариант, повторное нажатие той же буквы выбирает его
+    /// (Enter и пробел на кнопке с фокусом работают штатно). Стрелки и Tab тоже перемещают фокус между вариантами.
+    /// </summary>
     private void OnPreviewKeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key is < Key.A or > Key.Z || Keyboard.Modifiers != ModifierKeys.None || DataContext is not QuizViewModel vm)
@@ -76,15 +80,50 @@ public partial class QuizView : UserControl
         }
 
         var index = e.Key - Key.A;
-        if (index < vm.VisibleOptions.Count)
+        if (index >= vm.VisibleOptions.Count ||
+            OptionsList.ItemContainerGenerator.ContainerFromIndex(index) is not DependencyObject container ||
+            FindButton(container) is not { } button)
+        {
+            return;
+        }
+
+        e.Handled = true;
+        if (e.IsRepeat)
+        {
+            return; // удержание клавиши не должно выбирать вариант
+        }
+
+        if (button.IsKeyboardFocused)
         {
             var option = vm.VisibleOptions[index];
             if (vm.SelectOptionCommand.CanExecute(option))
             {
                 vm.SelectOptionCommand.Execute(option);
-                e.Handled = true;
             }
         }
+        else
+        {
+            button.Focus();
+        }
+    }
+
+    private static Button? FindButton(DependencyObject root)
+    {
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++)
+        {
+            var child = VisualTreeHelper.GetChild(root, i);
+            if (child is Button button)
+            {
+                return button;
+            }
+
+            if (FindButton(child) is { } nested)
+            {
+                return nested;
+            }
+        }
+
+        return null;
     }
 
     // ---------- Встряска при ошибке ----------

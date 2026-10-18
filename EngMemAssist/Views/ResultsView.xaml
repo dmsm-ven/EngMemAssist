@@ -64,7 +64,7 @@
                 </ui:CardExpander>
 
                 <StackPanel Orientation="Horizontal">
-                    <ui:Button Margin="0,0,8,0" Padding="24,10" Appearance="Primary" Command="{Binding AgainCommand}" Content="Ещё раз" />
+                    <ui:Button x:Name="AgainButton" Margin="0,0,8,0" Padding="24,10" Appearance="Primary" Command="{Binding AgainCommand}" Content="Ещё раз" />
                     <ui:Button Margin="0,0,8,0" Padding="16,10" Command="{Binding HomeCommand}" Content="На главную" />
                     <ui:Button Padding="16,10" Command="{Binding BackToStatsCommand}" Content="К статистике"
                                Visibility="{Binding IsHistory, Converter={StaticResource BoolToVis}}" />
