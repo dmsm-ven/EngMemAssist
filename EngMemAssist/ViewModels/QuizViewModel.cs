@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EngMemAssist.Core.Models;
 using EngMemAssist.Core.Services;
@@ -115,6 +115,18 @@ public sealed partial class QuizViewModel : PageViewModelBase
         _startedAt = DateTime.UtcNow;
         Show(0);
         IsLoading = false;
+
+        _ = CloseAfterTimeoutAsync();
+    }
+
+    private async Task CloseAfterTimeoutAsync()
+    {
+        await Task.Delay(TimeSpan.FromMinutes(15));
+
+        if (!_isFinishing && !_cancelled)
+        {
+            Cancel();
+        }
     }
 
     private void Show(int index)
@@ -185,9 +197,9 @@ public sealed partial class QuizViewModel : PageViewModelBase
 
     /// <summary>«Не знаю»: ответ засчитывается как неверный, но показывается верный вариант (без встряски).</summary>
     [RelayCommand]
-    private Task DontKnowAsync() => AnswerAsync(null);
+    private Task DontKnowAsync() => AnswerAsync(null, 5000);
 
-    private async Task AnswerAsync(string? option)
+    private async Task AnswerAsync(string? option, int? feedbackDelayMs = null)
     {
         if (_isFinishing || _isAnswering || Current is null)
         {
@@ -207,7 +219,7 @@ public sealed partial class QuizViewModel : PageViewModelBase
             ShakeRequested?.Invoke(this, EventArgs.Empty);
         }
 
-        await Task.Delay(correct ? 450 : 850);
+        await Task.Delay(feedbackDelayMs ?? (correct ? 450 : 850));
 
         _isAnswering = false;
         if (_cancelled)
